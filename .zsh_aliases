@@ -3,14 +3,18 @@ alias m='gvim --remote-silent'
 alias rc='killall conky && conky -dq'
 alias sab='python /home/fkalter/SABnzbd/SABnzbd.py >> /home/fkalter/SABnzbd/sab.log 2>&1 &'
 
+alias rms='find . -name "*.sw[a-z]" -delete'
+
+# git shortcuts
 alias gs='git status'
 alias glog='git log --decorate --graph --oneline -5'
 
-#coloring
+# coloring
 alias grep='grep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
 
+# commands i use alot
 alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
