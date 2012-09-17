@@ -23,6 +23,10 @@ REPORTTIME=10
 # Path to your oh-my-zsh configuration.
 ZSH=$HOME/.oh-my-zsh
 
+# custom key-bindings
+bindkey -M viins 'jk' vi-cmd-mode
+
+
 # Set name of the theme to load.
 # Look in ~/.oh-my-zsh/themes/
 # Optionally, if you set this to "random", it'll load a random theme each
