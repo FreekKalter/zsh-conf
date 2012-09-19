@@ -4,6 +4,7 @@ alias rc='killall conky && conky -dq'
 alias sab='python /home/fkalter/SABnzbd/SABnzbd.py >> /home/fkalter/SABnzbd/sab.log 2>&1 &'
 
 alias rms='find . -name "*.sw[a-z]" -delete'
+alias gls='perl /home/fkalter/github/ls-uncommitted-color/ls.pl'
 
 # git shortcuts
 alias gs='git status'
