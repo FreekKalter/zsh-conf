@@ -7,8 +7,8 @@ ln -f $GIT_DIR/../.zshrc ~/.zshrc
 ln -f $GIT_DIR/../.zsh_aliases ~/.zsh_aliases
 ln -f $GIT_DIR/../.tmux.conf ~/.tmux.conf
 ln -f $GIT_DIR/../freek.zsh-theme ~/.oh-my-zsh/themes/freek.zsh-theme
+echo "Links created"
 };
-chomp $script;
 
 for( qw(post-commit  post-merge) ){
     my $file = ".git/hooks/$_";
@@ -16,3 +16,4 @@ for( qw(post-commit  post-merge) ){
     print $dh $script;
     `chmod +x $file`;
 };
+say "Hooks created";
