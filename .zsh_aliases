@@ -5,6 +5,7 @@ alias sab='python /home/fkalter/SABnzbd/SABnzbd.py >> /home/fkalter/SABnzbd/sab.
 
 alias rms='find . -name "*.sw[a-z]" -delete'
 alias gls='perl ~/stable/ls-uncommitted-color/ls.pl'
+alias awk='gawk --re-interval'
 
 # git shortcuts
 alias gs='git status'
