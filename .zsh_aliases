@@ -3,7 +3,7 @@ alias m='gvim --remote-silent'
 alias rc='killall conky && conky -dq'
 alias sab='python /home/fkalter/SABnzbd/SABnzbd.py >> /home/fkalter/SABnzbd/sab.log 2>&1 &'
 
-alias rms='find . -name "*.sw[a-z]" -delete'
+alias rms='find . -name ".*.sw[a-z]" -print -delete'
 alias gls='perl ~/stable/ls-uncommitted-color/ls.pl'
 alias awk='gawk --re-interval'
 
