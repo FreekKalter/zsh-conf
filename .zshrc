@@ -23,6 +23,8 @@ REPORTTIME=10
 # Path to your oh-my-zsh configuration.
 ZSH=$HOME/.oh-my-zsh
 
+# no freaking auto correct
+unsetopt correct_all
 # custom key-bindings
 bindkey -M viins 'jk' vi-cmd-mode
 
