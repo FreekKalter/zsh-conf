@@ -23,8 +23,6 @@ REPORTTIME=10
 # Path to your oh-my-zsh configuration.
 ZSH=$HOME/.oh-my-zsh
 
-# no freaking auto correct
-unsetopt correct_all
 # custom key-bindings
 bindkey -M viins 'jk' vi-cmd-mode
 
@@ -48,6 +46,9 @@ source ~/.zsh_aliases
 plugins=(git extract vi-mode perl cpanm)
 
 source $ZSH/oh-my-zsh.sh
+
+# no freaking auto correct
+unsetopt correct_all
 
 # Customize to your needs...
 #export PATH=/home/fkalter/perl5/perlbrew/bin:/home/fkalter/perl5/perlbrew/perls/perl-5.16.0/bin:/usr/lib/lightdm/lightdm:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games
