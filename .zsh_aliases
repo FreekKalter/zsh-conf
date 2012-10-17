@@ -4,7 +4,8 @@ alias rc='killall conky && conky -dq'
 alias sab='python /home/fkalter/SABnzbd/SABnzbd.py >> /home/fkalter/SABnzbd/sab.log 2>&1 &'
 
 alias rms='find . -name ".*.sw[a-z]" -print -delete'
-#alias unrarall='find . -name "*.rar" -exec unrar e -ad {} \;'
+alias unrarall='find . -name "*.rar" -exec unrar e -ad {} \;'
+alias split-image='perl ~/scripts/split-image.pl'
 
 alias gls='perl ~/stable/ls-uncommitted-color/ls.pl'
 alias awk='gawk --re-interval'
@@ -24,6 +25,9 @@ alias la='ls -A'
 alias l='ls -CF'
 alias xx='exit'
 alias s='sudo'
+
+# global aliases
+alias -g L="| less"
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
