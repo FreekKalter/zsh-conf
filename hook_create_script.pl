@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use v5.8;
+use v5.12;
 
 my $script= q{#!/bin/sh
 ln -f $GIT_DIR/../.zshrc ~/.zshrc
