@@ -8,7 +8,7 @@ ln -f $GIT_DIR/../.zsh_aliases ~/.zsh_aliases
 ln -f $GIT_DIR/../.tmux.conf ~/.tmux.conf
 ln -f $GIT_DIR/../freek.zsh-theme ~/.oh-my-zsh/themes/freek.zsh-theme
 
-mkdir ~/scripts
+mkdir -p ~/scripts
 ln -f $GIT_DIR/../scripts/* ~/scripts
 
 echo "Links created"
