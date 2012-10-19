@@ -1,0 +1,3 @@
+# zsh shell config files + script dir with usefull little scripts (mostly perl)
+
+    tmux + zsh + oh-my-zsh + freek.zsh-theme = AWSOME SHELL
