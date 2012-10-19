@@ -33,3 +33,14 @@ alias -g L="| less"
 #   sleep 10; alert
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 alias tmux='TERM=screen-256color-bce tmux'
+
+function install-dep()
+{
+   if [ -z "$1" ]; then
+      echo usage: $0 perl_file_with_dependencies \[folder_to_install_dep\]
+   elif [ -z "$2" ]; then
+      grep '^use' $1 | sed -e 's/use //' -e 's/;//' -e '/ / d' | xargs -I {} cpanm {}
+   else
+      grep '^use' $1 | sed -e 's/use //' -e 's/;//' -e '/ / d' | xargs -I {} cpanm -L $2 {}
+   fi
+}
