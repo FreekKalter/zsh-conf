@@ -11,6 +11,9 @@ ln -f $GIT_DIR/../freek.zsh-theme ~/.oh-my-zsh/themes/freek.zsh-theme
 mkdir -p ~/scripts
 ln -f $GIT_DIR/../scripts/* ~/scripts
 
+mkdir -p ~/scripts/sabnzbd
+ln -f $GIT_DIR/../scripts/sabnzbd/* ~/scripts/sabnzbd
+
 echo "Links created"
 };
 
