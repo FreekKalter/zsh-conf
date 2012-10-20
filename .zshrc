@@ -56,6 +56,9 @@ export EDITOR='vim'
 #export PATH=/home/fkalter/perl5/perlbrew/bin:/home/fkalter/perl5/perlbrew/perls/perl-5.16.0/bin:/usr/lib/lightdm/lightdm:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games
 
 source ~/perl5/perlbrew/etc/bashrc
+
+export PATH=$PATH:~/scripts
+
 # TMUX
 if which tmux 2>&1 >/dev/null; then
     # if no session is started, start a new session

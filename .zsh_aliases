@@ -6,8 +6,6 @@ alias sab='python /home/fkalter/SABnzbd/SABnzbd.py >> /home/fkalter/SABnzbd/sab.
 alias rms='find . -name ".*.sw[a-z]" -print -delete'
 alias unrarall='find . -name "*.rar" -exec unrar e -ad {} \;'
 
-alias gls='~/scripts/ls.pl'
-alias split-image='~/scripts/split-image.pl'
 alias awk='gawk --re-interval'
 
 # git shortcuts
