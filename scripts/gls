@@ -37,13 +37,24 @@ for my $file (@files){
     $pm->start and next;
     my $filename = basename($file);
     if( -d $file){
+        # under version control
         if( -e dir($file, ".git") ){
             my $git_command = "git --git-dir=$filename/.git --work-tree=$filename ";
-            # under version control
 
             my $git_status = `$git_command status`;
 
             if( $git_status =~ /nothing to commit/ ){
+
+                my ($return) = split("\n",`$git_command remote -v` );
+                $return =~ /^(\w+)\s+(.*)\s+(\(\w+\))$/;
+                my $address = $2 =~ s/\.git$//r;
+                my $head = `curl --head $address 2>/dev/null`;
+                ($head) = $head =~ /(.*)\n/;
+                if($head !~ /200/){
+                    print_s $filename;
+                    next;
+                }
+
                 if( `$git_command fetch 2>&1` =~ /ERROR/ ){
                     print_s $filename;
                     next;
