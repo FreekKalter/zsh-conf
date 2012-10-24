@@ -2,84 +2,129 @@
 #===============================================================================
 #         FILE: ls.pl
 #
-#        USAGE: ./ls.pl  
+#        USAGE: ./ls.pl
 #
 #  DESCRIPTION: Color output of folders with dirty git work dir.
 #
-#       AUTHOR: Freek Kalter, 
-#      COMPANY: Kalter&Co 
+#       AUTHOR: Freek Kalter,
+#      COMPANY: Kalter&Co
 #      VERSION: 1.0
 #      CREATED: 09/19/2012 05:12:45 PM
 #===============================================================================
-use v5.16;
+use 5.016000;    # v5.16
+use strict;
+use warnings;
+use Carp;
 use Path::Class;
-use Cwd ;
+use Cwd;
 use File::Basename;
 use Term::ANSIColor;
 use Parallel::ForkManager;
+use IPC::Open3 qw( open3 );
+use Symbol;
 
-sub print_s($){
+sub print_s {
     my $var = shift;
     print $var . '  ';
+    return;
 }
-my $pm = new Parallel::ForkManager(30);
+my $pm = Parallel::ForkManager->new(30);
+my ($writer, $reader, $err, $pid);
+$err = gensym;
 
 my $dir = cwd();
 
-opendir( my $dh, $dir ) or die "Can't open $dir $!";
+opendir(my $dh, $dir) or croak "Can't open $dir $!";
 
-my @files = map{ file($dir, $_) }
-            grep{ !/^.{1,2}$/ } 
-            readdir($dh);
-my @output =();
+my @files = map { file($dir, $_) }
+  grep { !/^.{1,2}$/x } readdir($dh);
+my @output = ();
 
-for my $file (@files){
+for my $file (@files) {
     $pm->start and next;
     my $filename = basename($file);
-    if( -d $file){
+    if (-d $file) {
+
         # under version control
-        if( -e dir($file, ".git") ){
+        if (-e dir($file, ".git")) {
             my $git_command = "git --git-dir=$filename/.git --work-tree=$filename ";
 
-            my $git_status = `$git_command status`;
+            $pid = open3($writer, $reader, $reader, qq($git_command status));
+            waitpid($pid, 0);
+            my $git_status = do { local $/ = undef; <$reader> };
 
-            if( $git_status =~ /nothing to commit/ ){
+            if ($git_status =~ /nothing to commit/) {
 
-                my ($return) = split("\n",`$git_command remote -v` );
-                $return =~ /^(\w+)\s+(.*)\s+(\(\w+\))$/;
-                my $address = $2 =~ s/\.git$//r;
-                my $head = `curl --head $address 2>/dev/null`;
-                ($head) = $head =~ /(.*)\n/;
-                if($head !~ /200/){
+                # check if remote exists
+                $pid = open3($writer, $reader, $reader, qq($git_command remote -v));
+                waitpid($pid, 0);
+                my ($return) = split(
+                    "\n",
+                    do { local $/ = undef; <$reader> }
+                );
+                my $address;
+                if ($return =~ /^(\w+)\s+(.*)\s+(\(\w+\))$/x) {
+                    $address = $2 =~ s/\.git$//xr;
+                }
+                if ($address =~ /^http/x) {
+
+                    $pid = open3($writer, $reader, $err, qq(curl --head $address));
+                    waitpid($pid, 0);
+                    my $head = <$reader>;
+                    if (!$head) {
+
+                        # no internet or something else
+                        print_s $filename;
+                        next;
+                    }
+                    if ($head !~ /200/x) {
+
+                        # (re)moved from remote server
+                        print_s $filename;
+                        next;
+                    }
+                }
+                elsif ($address =~ /^ssh/x) {
+                }
+
+                $pid = open3($writer, $reader, $reader, qq($git_command fetch));
+                waitpid($pid, 0);
+
+                if (do { local $/ = undef; <$reader> }
+                    =~ /ERROR/
+                  )
+                {
                     print_s $filename;
                     next;
                 }
 
-                if( `$git_command fetch 2>&1` =~ /ERROR/ ){
-                    print_s $filename;
-                    next;
-                }
+                $pid = open3($writer, $reader, $reader, qq($git_command status));
+                waitpid($pid, 0);
+                $git_status = do { local $/ = undef; <$reader> };
 
-                $git_status = `$git_command  status`;
-                if( $git_status =~ /branch is ahead of/ ){
+                if ($git_status =~ /branch is ahead of/) {
                     print_s colored($filename, 'green bold on_yellow');
                     next;
-                }elsif( $git_status =~ /branch is behind/ ){
+                }
+                elsif ($git_status =~ /branch is behind/) {
                     print_s colored($filename, 'red on_yellow');
                     next;
                 }
-            }else{ # uncommitted changes (dirty working dir)
-                print_s colored($filename ,'red bold');
+            }
+            else {    # uncommitted changes (dirty working dir)
+                print_s colored($filename, 'red bold');
                 next;
             }
-        }else{
+        }
+        else {
             # not under version control
             print_s colored($filename, 'blue bold');
             next;
         }
     }
     print_s $filename;
-}continue{
+}
+continue {
     $pm->finish;
 }
 $pm->wait_all_children;
@@ -92,3 +137,4 @@ color scheme
 
     behind remote:              red on yellow
     ahead of remote:            green on yellow
+	this can cause trouble with some pod utilities
