@@ -1,39 +1,50 @@
 #!/home/fkalter/perl
-use v5.14;
+use 5.016000;
+use warnings;
+use strict;
 use Math::Random::Secure qw( irand );
+use Carp;
+use IPC::Open3 qw( open3 );
 
 my $sock = "/home/fkalter/vlc-random.sock";
-my $log = "/home/fkalter/log.txt";
-open(my $lh, ">>", $log) or die "Could not open $log for writing: $!";
+my $log  = "/home/fkalter/log.txt";
+my ($read, $write, $pid);
 
-if( -e $sock ) {
-    if( system( "echo 'logout' | nc -U $sock" )){
-        unlink $sock;                         
+if (-e $sock) {
+    if (system("echo 'logout' | nc -U $sock")) {
+        unlink $sock;
         &fork_vlc();
-    }   
-}else{
+    }
+}
+else {
     &fork_vlc();
 }
 
-opendir( my $dh, "/data/down" );
-my @files = grep{ ! /^\.{1,2}/ } readdir($dh); 
- 
-my $rand =irand(scalar @files);  
+opendir(my $dh, "/data/down");
+my @files = grep { !/^\.{1,2}/x } readdir($dh);
+
+open(my $lh, ">>", $log) or croak "Could not open $log for writing: $!";
+my $rand = irand(scalar @files);
 print $lh "$#files, $rand\n";
+close $lh;
 
 my $to_add = "/data/down/" . $files[$rand];
-
-my $status = `echo "add $to_add" | nc -U $sock`;
-if( $status =~ /menu select/ ){
-    $status = `echo "pause" | nc -U $sock`;
-    $status = `echo "add $to_add" | nc -U $sock`;
+$pid = open3($write, $read, $read, qq( echo "add $to_add" | nc -U $sock ));
+waitpid($pid, 0);
+my $status = do { local $/ = undef; <$read> };
+if ($status =~ /menu select/) {
+    $pid = open3($write, $read, $read, qq( echo "pause" | nc -U $sock ));
+    waitpid($pid, 0);
+    $pid = open3($write, $read, $read, qq( echo "add $to_add" | nc -U $sock ));
+    waitpid($pid, 0);
 }
 close($lh);
 
 sub fork_vlc {
-    die "could not fork\n" unless defined( my $pid = fork);
-    if( ! $pid){
+    die "could not fork\n" unless defined($pid = fork);
+    if (!$pid) {
         exec "vlc --extraintf oldrc --rc-unix $sock > /dev/null 2>&1";
     }
     sleep 2;
+    return;
 }
