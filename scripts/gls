@@ -19,18 +19,28 @@ use Path::Class;
 use Cwd;
 use File::Basename;
 use Term::ANSIColor;
+use Net::GitHub::V3;
 use Parallel::ForkManager;
 use IPC::Open3 qw( open3 );
 use Symbol;
 
 sub print_s {
     my $var = shift;
-    print $var . '  ';
+    print $var . "  ";
     return;
 }
 my $pm = Parallel::ForkManager->new(30);
 my ($writer, $reader, $err, $pid);
 $err = gensym;
+
+open(my $fh, "<", "/home/fkalter/.git_credentials") or croak "Can't open git credentials: $!";
+my $cred;
+while(my($var, $value) = split("=", <$fh>)){
+    chomp $value; 
+    $cred->{$var} = $value;
+}
+my $gh = Net::GitHub::V3->new($cred);
+my @repos = map { $_->{name} } $gh->repos->list;
 
 my $dir = cwd();
 
@@ -38,90 +48,96 @@ opendir(my $dh, $dir) or croak "Can't open $dir $!";
 
 my @files = map { file($dir, $_) }
   grep { !/^.{1,2}$/x } readdir($dh);
-my @output = ();
 
 for my $file (@files) {
     $pm->start and next;
     my $filename = basename($file);
-    if (-d $file) {
+    if (not -d $file) {
+        print_s $filename;
+        next;
+    }
 
-        # under version control
-        if (-e dir($file, ".git")) {
-            my $git_command = "git --git-dir=$filename/.git --work-tree=$filename ";
+    # not under version control
+    if (not -e dir($file, ".git")) {
+        print_s colored($filename, 'blue bold');
+        next;
+    }
 
-            $pid = open3($writer, $reader, $reader, qq($git_command status));
-            waitpid($pid, 0);
-            my $git_status = do { local $/ = undef; <$reader> };
+    # get git status
+    my $git_command = "git --git-dir=$filename/.git --work-tree=$filename ";
+    $pid = open3($writer, $reader, $reader, qq($git_command status));
+    waitpid($pid, 0);
+    my $git_status = do { local $/ = undef; <$reader> };
 
-            if ($git_status =~ /nothing to commit/) {
+    if ($git_status !~ /nothing to commit/) {
 
-                # check if remote exists
-                $pid = open3($writer, $reader, $reader, qq($git_command remote -v));
-                waitpid($pid, 0);
-                my ($return) = split(
-                    "\n",
-                    do { local $/ = undef; <$reader> }
-                );
-                my $address;
-                if ($return =~ /^(\w+)\s+(.*)\s+(\(\w+\))$/x) {
-                    $address = $2 =~ s/\.git$//xr;
-                }
-                if ($address =~ /^http/x) {
+        # uncommitted changes (dirty working dir)
+        print_s colored($filename, 'red bold');
+        next;
+    }
 
-                    $pid = open3($writer, $reader, $err, qq(curl --head $address));
-                    waitpid($pid, 0);
-                    my $head = <$reader>;
-                    if (!$head) {
+    # check if remote exists
+    $pid = open3($writer, $reader, $reader, qq($git_command remote -v));
+    waitpid($pid, 0);
+    my ($return) = split(
+        "\n",
+        do { local $/ = undef; <$reader> }
+    );
+    my $address;
 
-                        # no internet or something else
-                        print_s $filename;
-                        next;
-                    }
-                    if ($head !~ /200/x) {
+    if ($return !~ /^\w+\s+(.*)\s+\(\w+\)$/x) {
+        print_s colored($filename, 'blue on_red');    # can't parse 'git remote -v' output
+        next;
+    }
+    else {
+        $address = $1 =~ s/\.git$//xr;
+    }
+    if ($address !~ /^http/x && $address !~ /^git\@github/x && $address !~ /^ssh/x) {
+        print_s colored($filename, 'blue on_red');    # can't parse 'git remote -v' output
+        next;
+    }
 
-                        # (re)moved from remote server
-                        print_s $filename;
-                        next;
-                    }
-                }
-                elsif ($address =~ /^ssh/x) {
-                }
+    # filter out remotes we cannot fetch from and print the in red background with white letters
+    if ($address =~ /^http/x) {
+        $pid = open3($writer, $reader, $err, qq(curl --head $address));
+        waitpid($pid, 0);
+        my $head = <$reader>;
+        if (!$head || $head !~ /200/x) {
 
-                $pid = open3($writer, $reader, $reader, qq($git_command fetch));
-                waitpid($pid, 0);
-
-                if (do { local $/ = undef; <$reader> }
-                    =~ /ERROR/
-                  )
-                {
-                    print_s $filename;
-                    next;
-                }
-
-                $pid = open3($writer, $reader, $reader, qq($git_command status));
-                waitpid($pid, 0);
-                $git_status = do { local $/ = undef; <$reader> };
-
-                if ($git_status =~ /branch is ahead of/) {
-                    print_s colored($filename, 'green bold on_yellow');
-                    next;
-                }
-                elsif ($git_status =~ /branch is behind/) {
-                    print_s colored($filename, 'red on_yellow');
-                    next;
-                }
-            }
-            else {    # uncommitted changes (dirty working dir)
-                print_s colored($filename, 'red bold');
-                next;
-            }
-        }
-        else {
-            # not under version control
-            print_s colored($filename, 'blue bold');
+            # no internet or something else
+            print_s colored($filename, 'white on_red');
             next;
         }
     }
+
+    # if we get here, there is nothing to commit and the remote is (probably good to fetch from)
+    $pid = open3($writer, $reader, $reader, qq($git_command fetch));
+    waitpid($pid, 0);
+
+    # if remote turns out to slip through earlyer checks
+    # (stil print white on red to indicate remote problems)
+    if (do { local $/ = undef; <$reader> }
+        =~ /ERROR/
+      )
+    {
+        print_s colored($filename, 'white on_red');
+        next;
+    }
+
+    $pid = open3($writer, $reader, $reader, qq($git_command status));
+    waitpid($pid, 0);
+    $git_status = do { local $/ = undef; <$reader> };
+
+    if ($git_status =~ /branch is ahead of/) {
+        print_s colored($filename, 'green bold on_yellow');
+        next;
+    }
+    elsif ($git_status =~ /branch is behind/) {
+        print_s colored($filename, 'red on_yellow');
+        next;
+    }
+
+    # Absolute nothign wrong with this dir
     print_s $filename;
 }
 continue {
