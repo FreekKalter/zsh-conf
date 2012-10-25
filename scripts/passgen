@@ -1,6 +1,8 @@
 #!/home/fkalter/perl 
 
-use v5.14;
+use 5.016000;
+use warnings;
+use strict;
 use Math::Random::Secure qw( irand );
 use Getopt::Long;
 
@@ -21,12 +23,12 @@ my $result       = GetOptions(
     "specialchars=s" => \$specialchars
 );
 my @alpha   = "a" .. "z";
-my @numeric = ( 0 .. 9 );
+my @numeric = (0 .. 9);
 
 my @chars = ();
 
 if ($help) {
-    print( "
+    print("
 useage:  $0       
       --length       Number of chars in password
       -s
@@ -43,25 +45,25 @@ useage:  $0
 
       Use --no-option , to not use it, for example to not include numbers witch are on by default use --no-numeric.
       --help         Print this message
-      -h" );
+      -h");
 
 }
 else {
-    push( @chars, split( //, $specialchars ) );
+    push(@chars, split(//, $specialchars));
     if ($alpha) {
         push @chars, @alpha;
         if ($uc) {
-            push( @chars, map { uc } @alpha );
+            push(@chars, map {uc} @alpha);
         }
     }
 
     if ($num) {
-        push( @chars, @numeric );
+        push(@chars, @numeric);
     }
 
-    for ( my $j = 0 ; $j < $quantity ; $j++ ) {
-        for ( my $i = 0 ; $i < $length ; $i++ ) {
-            print $chars[ irand( scalar(@chars) ) ];
+    for (my $j = 0; $j < $quantity; $j++) {
+        for (my $i = 0; $i < $length; $i++) {
+            print $chars[irand(scalar(@chars))];
         }
         print "\n";
     }
