@@ -24,13 +24,21 @@ alias l='ls -CF'
 alias xx='exit'
 alias s='sudo'
 
+
 # global aliases
 alias -g L="| less"
+alias -g sus="echo '~/scripts/suspend'"
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 alias tmux='TERM=screen-256color-bce tmux'
+
+# command to find wich commands i use alot
+function fmuc()
+{
+    cat ~/.zsh_history | perl -ne 's/^.*;//;$h{$_}++; END{@s=sort{$h{$b}<=>$h{$a}}keys %h;for($i=0;$i<10;$i++){print $s[$i];}}'
+}
 
 function install-dep()
 {
