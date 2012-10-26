@@ -1,5 +1,3 @@
-alias m='gvim --remote-silent'
-
 alias rc='killall conky && conky -dq'
 alias sab='python /home/fkalter/SABnzbd/SABnzbd.py >> /home/fkalter/SABnzbd/sab.log 2>&1 &'
 
@@ -11,6 +9,8 @@ alias awk='gawk --re-interval'
 # git shortcuts
 alias gs='git status'
 alias glog='git log --decorate --graph --oneline -5'
+alias v='vim'
+alias gd='git diff'
 
 # coloring
 alias grep='grep --color=auto'
@@ -23,7 +23,6 @@ alias la='ls -A'
 alias l='ls -CF'
 alias xx='exit'
 alias s='sudo'
-
 
 # global aliases
 alias -g L="| less"
