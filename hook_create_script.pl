@@ -1,18 +1,20 @@
-#!/usr/bin/perl
+#!/home/fkalter/perl
 
 use v5.12;
+use Cwd;
+use File::Spec;
+use Path::Class;
 
-my $script= q{#!/bin/sh
-ln -f $GIT_DIR/../.zshrc ~/.zshrc
-ln -f $GIT_DIR/../.zsh_aliases ~/.zsh_aliases
-ln -f $GIT_DIR/../.tmux.conf ~/.tmux.conf
-ln -f $GIT_DIR/../freek.zsh-theme ~/.oh-my-zsh/themes/freek.zsh-theme
+my $dir = dir( File::Spec->rel2abs( getcwd ) );
+
+my $script= qq{#!/bin/sh
+ln -f \$GIT_DIR/../.zshrc ~/.zshrc
+ln -f \$GIT_DIR/../.zsh_aliases ~/.zsh_aliases
+ln -f \$GIT_DIR/../.tmux.conf ~/.tmux.conf
+ln -f \$GIT_DIR/../freek.zsh-theme ~/.oh-my-zsh/themes/freek.zsh-theme
 
 mkdir -p ~/scripts
-ln -sf $GIT_DIR/../scripts/* ~/scripts
-
-mkdir -p ~/scripts/sabnzbd
-ln -f $GIT_DIR/../scripts/sabnzbd/* ~/scripts/sabnzbd
+ln -sf $dir/*  ~/scripts
 
 echo "Links created"
 };
