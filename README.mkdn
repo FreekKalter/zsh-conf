@@ -15,8 +15,6 @@
 
 * gls (git ls)
 
-    hello this is a test
-
 * sabnzb
 
 * vlc
