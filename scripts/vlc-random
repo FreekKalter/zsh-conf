@@ -25,7 +25,7 @@ my @files = grep { !/^\.{1,2}/x } readdir($dh);
 
 open(my $lh, ">>", $log) or croak "Could not open $log for writing: $!";
 my $rand = irand(scalar @files);
-print $lh "$#files, $rand\n";
+print $lh "$files[$rand]\n";
 close $lh;
 
 my $to_add = "/data/down/" . $files[$rand];
