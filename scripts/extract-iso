@@ -1,0 +1,34 @@
+#!/home/fkalter/perl
+
+use 5.016000;
+use warnings;
+
+use Path::Class;
+use IPC::Open3 qw( open3 );
+use Carp;
+
+my ($read, $write, $pid);
+
+chomp $ARGV[0];
+my $file = file($ARGV[0]);
+my $dir = $file->dir; 
+
+open(my $fh, ">>", "/home/fkalter/github/zsh-conf/scripts/test.log") or croak "can't open log file: $!";
+$pid = open3($write, $read, $read, qq( mount '$file' /media/film) );
+while(<$read>){
+    print $fh $_;
+}
+waitpid($pid, 0);
+
+$pid = open3($write, $read, $read, qq( cp -vR /media/film/* '$dir' ));
+while(<$read>){
+    print $fh $_; 
+}
+waitpid($pid, 0);
+
+$pid = open3($write, $read, $read, qq(umount /media/film && chown -R fkalter:fkalter '$dir/*' ));
+while(<$read>){
+    print $fh $_; 
+}
+waitpid($pid, 0);
+close($fh);

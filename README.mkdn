@@ -1,3 +1,26 @@
-# zsh shell config files + script dir with usefull little scripts (mostly perl)
+# zsh shell config files 
 
-    tmux + zsh + oh-my-zsh + freek.zsh-theme = AWSOME SHELL
+> tmux + zsh + oh-my-zsh + freek.zsh-theme = **AWSOME SHELL**
+
+*****
+## config files
+
+* zsh
+
+* tmux
+
+* theme
+
+## scripts
+
+* gls (git ls)
+
+    hello this is a test
+
+* sabnzb
+
+* vlc
+
+* wallpaper
+
+* passgen
