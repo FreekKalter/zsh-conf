@@ -3,6 +3,7 @@
 > tmux + zsh + oh-my-zsh + freek.zsh-theme = **AWSOME SHELL**
 
 *****
+
 ## config files
 
 * zsh
