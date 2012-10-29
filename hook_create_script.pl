@@ -5,7 +5,7 @@ use Cwd;
 use File::Spec;
 use Path::Class;
 
-my $dir = dir( File::Spec->rel2abs( getcwd ) );
+my $dir = dir( File::Spec->rel2abs( getcwd ), "scripts" );
 
 my $script= qq{#!/bin/sh
 ln -f \$GIT_DIR/../.zshrc ~/.zshrc
