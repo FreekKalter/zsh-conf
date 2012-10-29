@@ -7,6 +7,7 @@ use Path::Class;
 use Math::Random::Secure qw( irand );
 use Carp;
 use IPC::Open3 qw( open3 );
+use Data::Dumper;
 
 my ($read, $write, $pid, $fh);
 
@@ -19,21 +20,22 @@ my $machine_id = do { local $/ = undef; <$fh> };
 close($fh);
 chomp $machine_id;
 my $dbus_session_file = "/home/fkalter/.dbus/session-bus/${machine_id}-0";
+my %tmpENV;
 if (-e $dbus_session_file) {
     open($fh, "<", $dbus_session_file) or croak "Could not open $dbus_session_file: $!";
     while (<$fh>) {
         my ($var, $val) = /([A-Z_]+)=(.*)/x;
-        local $ENV{$var} = $val if ($var);
+        $tmpENV{$var} = $val if ($var);
     }
     close($fh);
 }
-
+local %ENV = (%ENV, %tmpENV);
 # The path where the wallpapers can be found they schould be in the format
 # background-0.jpg background-1.jpg
 # 0 being the left monitor, and 1 being the right
 
 my $path = dir("/home/fkalter/Pictures/wallpapers");
-opendir(my $dh, $path);
+opendir(my $dh, $path) or croak "Can not open $path: $!";
 my @lefts = grep {/-0\.[a-z]{3}$/x} readdir($dh);
 
 $pid = open3($write, $read, $read,
@@ -41,6 +43,7 @@ $pid = open3($write, $read, $read,
 waitpid($pid, 0);
 my $current = <$read>;
 chomp $current;
+say $current;
 
 # make sure it always changes ( the one picked at random should not be same as the current one )
 my $left_monitor = file($path, $lefts[irand(scalar @lefts)]);
@@ -56,4 +59,4 @@ waitpid($pid, 0);
 $pid = open3($write, $read, $read,
     qq(xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor1/image-path -s $right_monitor));
 waitpid($pid, 0);
-
+say "Done";
