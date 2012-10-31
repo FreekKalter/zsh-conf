@@ -7,8 +7,6 @@ use Path::Class;
 use IPC::Open3 qw( open3 );
 use Carp;
 
-my ($read, $write, $pid);
-
 chomp $ARGV[0];
 my $file = file($ARGV[0]);
 my $dir = $file->dir; 
@@ -16,25 +14,20 @@ $dir = quotemeta($dir);
 
 open(my $fh, ">>", "/home/fkalter/scripts/extract-iso.log") or croak "can't open log file: $!";
 print $fh $dir;
-
-$pid = open3($write, $read, $read, qq( mount '$file' /media/film) );
-print $fh $_ while(<$read>);
-waitpid($pid, 0);
-
-$pid = open3($write, $read, $read, qq( cp -vR /media/film/* $dir ));
-print $fh $_ while(<$read>);
-waitpid($pid, 0);
-
-$pid = open3($write, $read, $read, qq(umount /media/film  ));
-print $fh $_ while(<$read>);
-waitpid($pid, 0);
-
-$pid = open3($write, $read, $read, qq( chown -R fkalter:fkalter $dir/* ));
-print $fh $_ while(<$read>);
-waitpid($pid, 0);
-
-$pid = open3($write, $read, $read, qq( chmod -R u+rw $dir/* ));
-print $fh $_ while(<$read>);
-waitpid($pid, 0);
-
+for my $command( qq( mount '$file' /media/film), qq( cp -uvR /media/film/* $dir ),       
+                qq(umount /media/film  i), 
+                qq( chown -R fkalter:fkalter $dir/* ), 
+                qq( chmod -R u+rw $dir/* ), 
+                qq( notify-send "Iso extract done!") ){
+    &back_tick_and_log($fh, $command);
+}
 close($fh);
+
+sub back_tick_and_log{
+    my ($fh, $command) = @_;
+    my ($read, $write, $pid);
+    $pid = open3($write, $read, $read, $command );
+    print $fh $_ while(<$read>);
+    waitpid($pid, 0);
+    return;
+}
