@@ -1,0 +1,24 @@
+#!/bin/sh
+
+find_com="find $1 -executable -type f -exec grep perl -l {} \\;"
+filter="xargs grep -h '^use ' | sed -e 's/use //' -e 's/;//' -e '/ / d' | sort | uniq | \
+            grep -Pv '^v?\d'" 
+
+
+if [ -z "$1" ]; then
+    echo usage: $0 perl_file_with_dependencies \[folder_to_install_dependencies\]
+else
+    if [ -d "$1" ]; then
+        if [ -z "$2" ]; then
+            eval "$find_com | $filter | xargs cpanm"
+        else
+            eval "$find_com | $filter | xargs -I {} cpanm -L $2 {}"
+        fi
+    else
+        if [ -z "$2" ]; then
+            eval "cat $1 | $filter | xargs cpanm"
+        else
+            eval "cat $1 | $filer | xargs -I {} cpanm -L $2 {}"
+        fi
+    fi
+fi

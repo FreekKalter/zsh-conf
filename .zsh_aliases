@@ -38,14 +38,3 @@ function fmuc()
 {
     cat ~/.zsh_history | perl -ne 's/^.*;//;$h{$_}++; END{@s=sort{$h{$b}<=>$h{$a}}keys %h;for($i=0;$i<10;$i++){print $s[$i];}}'
 }
-
-function install-dep()
-{
-   if [ -z "$1" ]; then
-      echo usage: $0 perl_file_with_dependencies \[folder_to_install_dep\]
-   elif [ -z "$2" ]; then
-      grep '^use' $1 | sed -e 's/use //' -e 's/;//' -e '/ / d' | xargs -I {} cpanm {}
-   else
-      grep '^use' $1 | sed -e 's/use //' -e 's/;//' -e '/ / d' | xargs -I {} cpanm -L $2 {}
-   fi
-}
