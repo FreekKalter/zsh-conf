@@ -1,6 +1,6 @@
 #!/bin/sh
 
-find_com="find $1 -executable -type f -exec grep perl -l {} \\;"
+find_com="find $1 -perm +0111 -type f -exec grep perl -l {} \\;"
 filter="xargs grep -h '^use ' | sed -e 's/use //' -e 's/;//' -e '/ / d' | sort | uniq | \
             grep -Pv '^v?\d'" 
 
