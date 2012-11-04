@@ -61,17 +61,19 @@ export PATH=$PATH:~/scripts:/usr/lib/go/bin
 
 # set go env variables
 
-export GOROOT="/usr/lib/go"
-export GOBIN="$GOROOT/bin"
-export GOARCH="386"
-export GOCHAR="8"
-export GOOS="linux"
-export GOEXE=""
-export GOHOSTARCH="386"
-export GOHOSTOS="linux"
-export GOTOOLDIR="/usr/lib/go/pkg/tool/linux_386"
-export GOGCCFLAGS="-g -O2 -fPIC -m32 -pthread"
-export CGO_ENABLED="1"
+if [[ $(uname) == "Linux" ]]; then
+    export GOROOT="/usr/lib/go"
+    export GOBIN="$GOROOT/bin"
+    export GOARCH="386"
+    export GOCHAR="8"
+    export GOOS="linux"
+    export GOEXE=""
+    export GOHOSTARCH="386"
+    export GOHOSTOS="linux"
+    export GOTOOLDIR="/usr/lib/go/pkg/tool/linux_386"
+    export GOGCCFLAGS="-g -O2 -fPIC -m32 -pthread"
+    export CGO_ENABLED="1"
+fi
 
 # TMUX
 if which tmux 2>&1 >/dev/null; then
