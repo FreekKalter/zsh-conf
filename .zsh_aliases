@@ -4,6 +4,11 @@ alias sab='python /home/fkalter/SABnzbd/SABnzbd.py >> /home/fkalter/SABnzbd/sab.
 alias rms='find . -name ".*.sw[a-z]" -print -delete'
 alias unrarall='find . -name "*.rar" -exec unrar e -ad {} \;'
 
+# tunnel (when using internet op public wifi)
+# -v for verbose so dedicate a terminal to it
+# -N for not execting a command on the host
+# -D portnumber for local forward (set this in firefox)
+alias london_tunnel='ssh -vN -D 10000 london'
 alias awk='gawk --re-interval'
 
 # git shortcuts
