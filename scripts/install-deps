@@ -1,8 +1,11 @@
 #!/bin/sh
 
-find_com="find $1 -perm +0111 -type f -exec grep perl -l {} \\;"
-filter="xargs grep -h '^use ' | sed -e 's/use //' -e 's/;//' -e '/ / d' | sort | uniq | \
-            grep -Pv '^v?\d'" 
+find_com="find -L $1 -perm +100 -type f -exec grep perl -l {} \\;" # find exutables with a perl shebang
+filter="xargs grep -h '^use '"                      # filter lines starting with "use" these are dependencies 
+filter="$filter | sed -e 's/use //' -e 's/;//'"     # strip the "use " part and the trailing semicolon
+filter="$filter | grep -Pv '^[a-z\d]'"              # filter dependencies starting wat a lowercase letter or number (these are pragma's use strict; for example)
+filter="$filter | grep -Eo '^[a-zA-Z0-9:]+'"        # grab just the interesting bit: "use Math::Random::Secure qw( irand );"  it will grap just "Math::Random::Secure"
+filter="$filter | sort | uniq"                      # call cpanm only once for every dependency found
 
 
 if [ -z "$1" ]; then
