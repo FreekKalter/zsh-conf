@@ -1,0 +1,14 @@
+#!/home/fkalter/perl
+
+use strict;
+use warnings;
+use 5.016000;
+use Carp;
+use File::Slurp;
+use File::Path qw ( remove_tree );
+
+my $lines = read_file( "/home/fkalter/log.txt" ,array_ref => 1, chomp => 1)  or croak "Could not open vlc-log for reading: $!";
+
+remove_tree( "/data/down/$lines->[ scalar @$lines -1 ]" );
+`~/scripts/vlc-random`;
+
