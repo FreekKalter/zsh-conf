@@ -20,15 +20,23 @@ use Cwd;
 use File::Basename;
 use Term::ANSIColor;
 use Net::GitHub::V3;
-use Parallel::ForkManager;
+use Parallel::ForkManager 0.7.6;
 use IPC::Open3 qw( open3 );
 use Symbol;
 
+my $number_columns = $ENV{COLUMNS};
 sub print_s {
+    state $length = 0;
     my $var = shift;
-    print $var . "  ";
+    $length += $var->{length} +2;
+    if($length > $number_columns){
+        $length = $var->{lenght}+2;
+        print "\n";
+    }
+    print $var->{filename} . "  ";
     return;
 }
+
 my $pm = Parallel::ForkManager->new(30);
 my ($writer, $reader, $err, $pid);
 $err = gensym;
@@ -45,18 +53,33 @@ opendir(my $dh, $dir) or croak "Can't open $dir $!";
 my @files = map { file($dir, $_) }
   grep { !/^.{1,2}$/x } readdir($dh);
 
+my @results;
+$pm -> run_on_finish ( # called BEFORE the first call to start()
+  sub {
+    my ($pid, $exit_code, $ident, $exit_signal, $core_dump, $data_structure_reference) = @_;
+
+    # retrieve data structure from child
+    if (defined($data_structure_reference)) {  # children are not forced to send anything
+      push @results,  $data_structure_reference;  # child passed a string reference
+    }
+  }
+);
+
+
 for my $file (@files) {
     $pm->start and next;
     my $filename = basename($file);
+    my %return_value;
+    $return_value{length} = length($filename);
     if (not -d $file) {
-        print_s $filename;
-        next;
+        $return_value{filename} = $filename;
+        $pm->finish(0, \%return_value);
     }
 
     # not under version control
     if (not -e dir($file, ".git")) {
-        print_s colored($filename, 'blue bold');
-        next;
+        $return_value{filename} = colored($filename, 'blue bold');
+        $pm->finish(0, \%return_value);
     }
 
     # get git status
@@ -68,8 +91,8 @@ for my $file (@files) {
     if ($git_status !~ /nothing to commit/) {
 
         # uncommitted changes (dirty working dir)
-        print_s colored($filename, 'red bold');
-        next;
+        $return_value{filename} = colored($filename, 'red bold');
+        $pm->finish(0, \%return_value);
     }
 
     # check if remote exists
@@ -82,15 +105,15 @@ for my $file (@files) {
     my $address;
 
     if ($return !~ /^\w+\s+(.*)\s+\(\w+\)$/x) {
-        print_s colored($filename, 'blue on_red');    # can't parse 'git remote -v' output
-        next;
+        $return_value{filename} = colored($filename, 'blue on_red');    # can't parse 'git remote -v' output
+        $pm->finish(0, \%return_value);
     }
     else {
         $address = $1 =~ s/\.git$//xr;
     }
     if ($address !~ /^http/x && $address !~ /^git\@github/x && $address !~ /^ssh/x) {
-        print_s colored($filename, 'blue on_red');    # can't parse 'git remote -v' output
-        next;
+        $return_value{filename} = colored($filename, 'blue on_red');    # can't parse 'git remote -v' output
+        $pm->finish(0, \%return_value);
     }
 
     # filter out remotes we cannot fetch from and print the in red background with white letters
@@ -101,8 +124,8 @@ for my $file (@files) {
         if (!$head || $head !~ /200/x) {
 
             # no internet or something else
-            print_s colored($filename, 'white on_red');
-            next;
+            $return_value{filename} = colored($filename, 'white on_red');
+            $pm->finish(0, \%return_value);
         }
     }
 
@@ -116,8 +139,8 @@ for my $file (@files) {
         =~ /ERROR/
       )
     {
-        print_s colored($filename, 'white on_red');
-        next;
+        $return_value{filename} = colored($filename, 'white on_red');
+        $pm->finish(0, \%return_value);
     }
 
     $pid = open3($writer, $reader, $reader, qq($git_command status));
@@ -125,21 +148,21 @@ for my $file (@files) {
     $git_status = do { local $/ = undef; <$reader> };
 
     if ($git_status =~ /branch is ahead of/) {
-        print_s colored($filename, 'green bold on_yellow');
-        next;
+        $return_value{filename} = colored($filename, 'green bold on_yellow');
+        $pm->finish(0, \%return_value);
     }
     elsif ($git_status =~ /branch is behind/) {
-        print_s colored($filename, 'red on_yellow');
-        next;
+        $return_value{filename} = colored($filename, 'red on_yellow');
+        $pm->finish(0, \%return_value);
     }
 
     # Absolute nothign wrong with this dir
-    print_s $filename;
-}
-continue {
-    $pm->finish;
+    $return_value{filename} = $filename;
+	$pm->finish(0, \%return_value);
 }
 $pm->wait_all_children;
+
+for(@results){ print_s($_); }
 print "\n";
 
 =cut

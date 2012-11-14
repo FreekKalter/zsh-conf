@@ -9,15 +9,15 @@ use Carp;
 
 chomp $ARGV[0];
 my $file = file($ARGV[0]);
-my $dir = $file->dir; 
+my $dir = $file->dir;
 $dir = quotemeta($dir);
 
 open(my $fh, ">>", "/home/fkalter/scripts/extract-iso.log") or croak "can't open log file: $!";
 print $fh $dir;
-for my $command( qq( mount '$file' /media/film), qq( cp -uvR /media/film/* $dir ),       
-                qq(umount /media/film  i), 
-                qq( chown -R fkalter:fkalter $dir/* ), 
-                qq( chmod -R u+rw $dir/* ), 
+for my $command( qq( mount '$file' /media/film), qq( cp -uvR /media/film/* $dir ),
+                qq(umount /media/film  i),
+                qq( chown -R fkalter:fkalter $dir/* ),
+                qq( chmod -R u+rw $dir/* ),
                 qq( notify-send "Iso extract done!") ){
     &back_tick_and_log($fh, $command);
 }
