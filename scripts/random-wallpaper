@@ -16,9 +16,8 @@ my ($read, $write, $pid, $fh);
 # The bit below extracts the info from ~/.dbus/session-bus and makes it enviroment variables for its child processes
 
 open($fh, "<", "/var/lib/dbus/machine-id") or croak "Can't open machine_id: $!";
-my $machine_id = do { local $/ = undef; <$fh> };
+chomp( my $machine_id = do { local $/ = undef; <$fh> } );
 close($fh);
-chomp $machine_id;
 my $dbus_session_file = "/home/fkalter/.dbus/session-bus/${machine_id}-0";
 my %tmpENV;
 if (-e $dbus_session_file) {
@@ -41,8 +40,7 @@ my @lefts = grep {/-0\.[a-z]{3}$/x} readdir($dh);
 $pid = open3($write, $read, $read,
     qq( xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/image-path ));
 waitpid($pid, 0);
-my $current = <$read>;
-chomp $current;
+chomp (my $current = <$read>);
 say $current;
 
 # make sure it always changes ( the one picked at random should not be same as the current one )

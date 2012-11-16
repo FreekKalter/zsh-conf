@@ -13,8 +13,7 @@ sub handle {
     my $e = shift;
     sleep 1;
     my $file = file($path , $e->{name});
-    my $res = `identify -format "\%w" $file`;
-    chomp $res;
+    chomp (my $res = `identify -format "\%w" $file`);
     if($res == 3840){
         `/home/fkalter/scripts/split-image $file`;
         my ( $base, $form ) = basename($file) =~ /(.+)\.(.+)/;
