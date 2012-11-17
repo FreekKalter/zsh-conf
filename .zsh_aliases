@@ -5,7 +5,7 @@ alias rms='find . -name ".*.sw[a-z]" -print -delete'
 alias unrarall='find . -name "*.rar" -exec unrar e -ad {} \;'
 
 # fwknok to open up port on london
-alias knok-knok='fwknop -A tcp/fwknop -A tcp/53467 -s --get-key="/Users/freekkalter/Dropbox/nothing" -D london.lan --verbose'
+alias knok-knok='fwknop -A tcp/fwknop -A tcp/53467 -s --get-key="/Users/freekkalter/Dropbox/nothing" -D 192.168.2.65 --verbose'
 
 # ssh using fwknop for portknocking/Single Packet Authorization
 alias ssh_london='knok-knok && ssh london'
