@@ -95,11 +95,10 @@ for my $file (@files) {
     if ($return !~ /^\w+\s+(.*)\s+\(\w+\)$/x) {
         $return_value{filename} = colored($filename, 'blue on_red');    # can't parse 'git remote -v' output
         $pm->finish(0, \%return_value);
-    }
-    else {
+    } else {
         $address = $1 =~ s/\.git$//xr;
     }
-    if ($address !~ /^http/x && $address !~ /^git\@github/x && $address !~ /^ssh/x) {
+    if ($address !~ /^http/x && $address !~ /^git\@bitbucket/x && $address !~ /^git\@github/x && $address !~ /^ssh/x) {
         $return_value{filename} = colored($filename, 'blue on_red');    # can't parse 'git remote -v' output
         $pm->finish(0, \%return_value);
     }
