@@ -1,7 +1,7 @@
 #!/bin/sh
 
-find_com="find -L $1 -perm +100 -type f -exec grep perl -l {} \\;" # find exutables with a perl shebang
-filter="xargs grep -h '^use '"                      # filter lines starting with "use" these are dependencies 
+find_com="find -L scripts -type f -exec awk '/#!.*perl/ && NR==1 {print FILENAME}' {} \;"
+filter="xargs grep -h '^use '"                      # filter lines starting with "use" these are dependencies
 filter="$filter | sed -e 's/use //' -e 's/;//'"     # strip the "use " part and the trailing semicolon
 filter="$filter | grep -Pv '^[a-z\d]'"              # filter dependencies starting wat a lowercase letter or number (these are pragma's use strict; for example)
 filter="$filter | grep -Eo '^[a-zA-Z0-9:]+'"        # grab just the interesting bit: "use Math::Random::Secure qw( irand );"  it will grap just "Math::Random::Secure"
