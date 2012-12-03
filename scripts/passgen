@@ -1,5 +1,6 @@
-#!/home/fkalter/perl 
+#!/usr/bin/env perl
 
+print "$]\n";
 use 5.016000;
 use warnings;
 use strict;
@@ -29,12 +30,12 @@ my @chars = ();
 
 if ($help) {
     print("
-useage:  $0       
+useage:  $0
       --length       Number of chars in password
       -s
-      --numeric      Include numbers in pass (On by default) 
+      --numeric      Include numbers in pass (On by default)
       -n
-      --quantity     Number of passwords to generate (default is 10)     
+      --quantity     Number of passwords to generate (default is 10)
       -q
       --alpha        Include letters (a .. z) (On by default)
       -a

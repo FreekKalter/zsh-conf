@@ -1,4 +1,4 @@
-#!/home/fkalter/perl
+#!/usr/bin/env perl
 #===============================================================================
 #         FILE: ls.pl
 #
@@ -24,7 +24,6 @@ use Parallel::ForkManager 0.7.6;
 use IPC::Open3 qw( open3 );
 use Symbol;
 use POSIX qw( floor ceil );
-use Data::Dumper;
 
 my $pm = Parallel::ForkManager->new(30);
 my ($writer, $reader, $err, $pid);

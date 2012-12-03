@@ -1,7 +1,7 @@
 #!/bin/sh
 
-find_com="find -L zsh-conf/scripts -name '.git' -prune -o ! -name '.*' -type f
-            -exec awk '/(^#!.*perl)|(^package)/ && NR == 1 {print FILENAME}' {} \;"
+find_com="find -L $1 -name '.git' -prune -o ! -name '.*' -type f \
+            -exec awk '/(^#!.*perl)|(^package)/ && NR == 1 {print FILENAME; exit}' {} \;"
 
 # get lines starting with "use", these are dependencies
 filter="xargs grep -h '^use '"
