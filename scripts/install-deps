@@ -1,27 +1,25 @@
 #!/bin/sh
 
-find_com="find -L scripts -type f -exec awk '/#!.*perl/ && NR==1 {print FILENAME}' {} \;"
-filter="xargs grep -h '^use '"                      # filter lines starting with "use" these are dependencies
-filter="$filter | sed -e 's/use //' -e 's/;//'"     # strip the "use " part and the trailing semicolon
-filter="$filter | grep -Pv '^[a-z\d]'"              # filter dependencies starting wat a lowercase letter or number (these are pragma's use strict; for example)
-filter="$filter | grep -Eo '^[a-zA-Z0-9:]+'"        # grab just the interesting bit: "use Math::Random::Secure qw( irand );"  it will grap just "Math::Random::Secure"
-filter="$filter | sort | uniq"                      # call cpanm only once for every dependency found
+find_com="find -L zsh-conf/scripts -name '.git' -prune -o ! -name '.*' -type f
+            -exec awk '/(^#!.*perl)|(^package)/ && NR == 1 {print FILENAME}' {} \;"
 
+# get lines starting with "use", these are dependencies
+filter="xargs grep -h '^use '"
+ # strip the "use " part and the trailing semicolon
+filter="$filter | sed -e 's/use //' -e 's/;//'"
+# remove dependencies starting wat a lowercase letter or number (these are pragma's "use strict;" for example)
+filter="$filter | grep -Pv '^[a-z\d]'"
+# grab just the interesting bit: "use Math::Random::Secure qw( irand );"  it will grap just "Math::Random::Secure"
+filter="$filter | grep -Eo '^[a-zA-Z0-9:]+'"
+# call cpanm only once for every dependency found
+filter="$filter | sort | uniq"
 
 if [ -z "$1" ]; then
     echo usage: $0 perl_file_with_dependencies \[folder_to_install_dependencies\]
 else
-    if [ -d "$1" ]; then
-        if [ -z "$2" ]; then
-            eval "$find_com | $filter | xargs cpanm"
-        else
-            eval "$find_com | $filter | xargs -I {} cpanm -L $2 {}"
-        fi
+    if [ -z "$2" ]; then
+        eval "$find_com | $filter | xargs cpanm"
     else
-        if [ -z "$2" ]; then
-            eval "cat $1 | $filter | xargs cpanm"
-        else
-            eval "cat $1 | $filer | xargs -I {} cpanm -L $2 {}"
-        fi
+        eval "$find_com | $filter | xargs -I {} cpanm -L $2 {}"
     fi
 fi
