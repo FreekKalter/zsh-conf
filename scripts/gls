@@ -24,6 +24,7 @@ use Parallel::ForkManager 0.7.6;
 use IPC::Open3 qw( open3 );
 use Symbol;
 use POSIX qw( floor ceil );
+use Unicode::Collate;
 
 my $pm = Parallel::ForkManager->new(30);
 my ($writer, $reader, $err, $pid);
@@ -40,7 +41,6 @@ opendir(my $dh, $dir) or croak "Can't open $dir $!";
 
 my @files = map { file($dir, $_) }
   grep { !/^.{1,2}$/x } readdir($dh);
-
 my @results;
 $pm -> run_on_finish ( # called BEFORE the first call to start()
     sub {
@@ -60,12 +60,14 @@ for my $file (@files) {
     $return_value{length} = length($filename);
     if (not -d $file) {
         $return_value{filename} = $filename;
+        $return_value{orig_filename} = $filename;
         $pm->finish(0, \%return_value);
     }
 
     # not under version control
     if (not -e dir($file, ".git")) {
         $return_value{filename} = colored($filename, 'blue bold');
+        $return_value{orig_filename} = $filename;
         $pm->finish(0, \%return_value);
     }
 
@@ -79,6 +81,7 @@ for my $file (@files) {
 
         # uncommitted changes (dirty working dir)
         $return_value{filename} = colored($filename, 'red bold');
+        $return_value{orig_filename} = $filename;
         $pm->finish(0, \%return_value);
     }
 
@@ -93,12 +96,14 @@ for my $file (@files) {
 
     if ($return !~ /^\w+\s+(.*)\s+\(\w+\)$/x) {
         $return_value{filename} = colored($filename, 'blue on_red');    # can't parse 'git remote -v' output
+        $return_value{orig_filename} = $filename;
         $pm->finish(0, \%return_value);
     } else {
         $address = $1 =~ s/\.git$//xr;
     }
     if ($address !~ /^http/x && $address !~ /^git\@bitbucket/x && $address !~ /^git\@github/x && $address !~ /^ssh/x) {
         $return_value{filename} = colored($filename, 'blue on_red');    # can't parse 'git remote -v' output
+        $return_value{orig_filename} = $filename;
         $pm->finish(0, \%return_value);
     }
 
@@ -111,6 +116,7 @@ for my $file (@files) {
 
             # no internet or something else
             $return_value{filename} = colored($filename, 'white on_red');
+            $return_value{orig_filename} = $filename;
             $pm->finish(0, \%return_value);
         }
     }
@@ -126,6 +132,7 @@ for my $file (@files) {
       )
     {
         $return_value{filename} = colored($filename, 'white on_red');
+        $return_value{orig_filename} = $filename;
         $pm->finish(0, \%return_value);
     }
 
@@ -135,32 +142,42 @@ for my $file (@files) {
 
     if ($git_status =~ /branch is ahead of/) {
         $return_value{filename} = colored($filename, 'green bold on_yellow');
+        $return_value{orig_filename} = $filename;
         $pm->finish(0, \%return_value);
     }
     elsif ($git_status =~ /branch is behind/) {
         $return_value{filename} = colored($filename, 'red on_yellow');
+        $return_value{orig_filename} = $filename;
         $pm->finish(0, \%return_value);
     }
 
     # Absolute nothign wrong with this dir
     $return_value{filename} = $filename;
+    $return_value{orig_filename} = $filename;
 	$pm->finish(0, \%return_value);
 }
 $pm->wait_all_children;
 
-@results = sort{ $a->{filename} cmp $b->{filename} } @results;
+my $collator = Unicode::Collate->new();
+for my $res(@results){
+    $res->{filename_sort_key} = $collator->getSortKey( $res->{orig_filename} );
+}
+@results = sort{ $a->{filename_sort_key} cmp $b->{filename_sort_key} } @results;
+
 &print_in_columns();
 
 sub print_in_columns{
     my $max = 0;
     for(@results){ $max = $_->{length} if $_->{length} > $max; }
 
+    $max++; # put space after the widest word
     my $nr_of_columns = int($ENV{COLUMNS}/$max);
-    my $nr_of_rows = ceil($#results/$nr_of_columns);
+    my $nr_of_rows = ceil(($#results + 1)/$nr_of_columns);
 
     for( my $y=0;$y<$nr_of_rows; $y++) {
         for( my $x=0;$x <$nr_of_columns; $x++) {
             if ($y*$nr_of_columns + $x > $#results) {last};
+            # compensate for colored words (color codes adds characters)
             my $diff = length($results[$y*$nr_of_columns+$x]->{filename}) - $results[$y*$nr_of_columns+$x]->{length};
             printf("%-*s", $max + $diff , $results[$y*$nr_of_columns+$x]->{filename});
         }
