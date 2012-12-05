@@ -40,7 +40,7 @@ my $dir = cwd();
 opendir(my $dh, $dir) or croak "Can't open $dir $!";
 
 my @files = map { file($dir, $_) }
-  grep { !/^.{1,2}$/x } readdir($dh);
+  grep { !/^\.{1,2}$/x } readdir($dh);
 my @results;
 $pm -> run_on_finish ( # called BEFORE the first call to start()
     sub {
@@ -158,15 +158,17 @@ for my $file (@files) {
 }
 $pm->wait_all_children;
 
+# sort using proper unicode sorting method
+#TODO dirs first/dirty first
 my $collator = Unicode::Collate->new();
 for my $res(@results){
     $res->{filename_sort_key} = $collator->getSortKey( $res->{orig_filename} );
 }
 @results = sort{ $a->{filename_sort_key} cmp $b->{filename_sort_key} } @results;
 
-&print_in_columns();
+&print_in_better_columns();
 
-sub print_in_columns{
+sub print_in_equal_columns{
     my $max = 0;
     for(@results){ $max = $_->{length} if $_->{length} > $max; }
 
@@ -180,6 +182,52 @@ sub print_in_columns{
             # compensate for colored words (color codes adds characters)
             my $diff = length($results[$y*$nr_of_columns+$x]->{filename}) - $results[$y*$nr_of_columns+$x]->{length};
             printf("%-*s", $max + $diff , $results[$y*$nr_of_columns+$x]->{filename});
+        }
+        print "\n";
+    }
+}
+
+
+sub print_in_better_columns{
+    # get a baseline, fill up first row to get a number of columns to work with
+    my ($total_width, $nr_of_columns)= (0,0);
+    for my $res (@results){
+        last if( $total_width + $res->{length}+1 > $ENV{COLUMNS});
+        $total_width += $res->{length} +1;
+        $nr_of_columns++;
+    }
+    my $nr_of_rows = ceil(($#results+1)/$nr_of_columns);
+
+    # figure out how wide each columns is going to be
+    my ($width, @column_widths);
+    do{
+        @column_widths= ();
+        $width = 0;
+        # get the widest field in the column ( this is how wide the columns going to be)
+        for( my $x=0; $x < $nr_of_columns; $x++){
+            my $max_column_width = 0;
+            for(my $y=0; $y < $nr_of_rows; $y++){
+                last if( (my $index = ($y * $nr_of_columns +$x)) > $#results );
+                if( $results[$index]->{length} > $max_column_width) {
+                    $max_column_width = $results[$index]->{length};
+                }
+            }
+            $width += $max_column_width +2;
+            push @column_widths, $max_column_width ;
+        }
+        # if it can not be alligned with this number of rows, decrease the number of rows and try again
+        if ($width > $ENV{COLUMNS}){
+            $nr_of_columns--;
+            $nr_of_rows = ceil(($#results+1)/$nr_of_columns);
+
+        }
+    }while($width > $ENV{COLUMNS});
+
+    for( my $y=0;$y<$nr_of_rows; $y++) {
+        for( my $x=0;$x <$nr_of_columns; $x++) {
+            last if ( (my $index = $y*$nr_of_columns + $x) > $#results);
+            my $diff = length($results[$index]->{filename}) - $results[$index]->{length};
+            printf("%-*s", $column_widths[$x] + $diff +2 , $results[$index]->{filename});
         }
         print "\n";
     }
