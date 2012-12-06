@@ -56,19 +56,13 @@ $pm -> run_on_finish ( # called BEFORE the first call to start()
 for my $file (@files) {
     $pm->start and next;
     my $filename = basename($file);
-    my %return_value;
-    $return_value{length} = length($filename);
     if (not -d $file) {
-        $return_value{filename} = $filename;
-        $return_value{orig_filename} = $filename;
-        $pm->finish(0, \%return_value);
+        $pm->finish(0, {filename => $filename});
     }
 
     # not under version control
     if (not -e dir($file, ".git")) {
-        $return_value{filename} = colored($filename, 'blue bold');
-        $return_value{orig_filename} = $filename;
-        $pm->finish(0, \%return_value);
+        $pm->finish(0, { filename => $filename , color => 'blue bold'} );
     }
 
     # get git status
@@ -80,9 +74,7 @@ for my $file (@files) {
     if ($git_status !~ /nothing to commit/) {
 
         # uncommitted changes (dirty working dir)
-        $return_value{filename} = colored($filename, 'red bold');
-        $return_value{orig_filename} = $filename;
-        $pm->finish(0, \%return_value);
+        $pm->finish(0, { filename => $filename , color => 'red bold'} );
     }
 
     # check if remote exists
@@ -95,16 +87,12 @@ for my $file (@files) {
     my $address;
 
     if ($return !~ /^\w+\s+(.*)\s+\(\w+\)$/x) {
-        $return_value{filename} = colored($filename, 'blue on_red');    # can't parse 'git remote -v' output
-        $return_value{orig_filename} = $filename;
-        $pm->finish(0, \%return_value);
+        $pm->finish(0, { filename => $filename , color => 'blue on_red'} ); # can't parse 'git remote -v' output
     } else {
         $address = $1 =~ s/\.git$//xr;
     }
     if ($address !~ /^http/x && $address !~ /^git\@bitbucket/x && $address !~ /^git\@github/x && $address !~ /^ssh/x) {
-        $return_value{filename} = colored($filename, 'blue on_red');    # can't parse 'git remote -v' output
-        $return_value{orig_filename} = $filename;
-        $pm->finish(0, \%return_value);
+        $pm->finish(0, { filename => $filename , color => 'blue on_red '} ); # can't parse 'git remote -v' output
     }
 
     # filter out remotes we cannot fetch from and print the in red background with white letters
@@ -113,11 +101,8 @@ for my $file (@files) {
         waitpid($pid, 0);
         my $head = <$reader>;
         if (!$head || $head !~ /200/x) {
-
             # no internet or something else
-            $return_value{filename} = colored($filename, 'white on_red');
-            $return_value{orig_filename} = $filename;
-            $pm->finish(0, \%return_value);
+            $pm->finish(0, { filename => $filename , color => 'white on_red'} );
         }
     }
 
@@ -127,13 +112,8 @@ for my $file (@files) {
 
     # if remote turns out to slip through earlyer checks
     # (stil print white on red to indicate remote problems)
-    if (do { local $/ = undef; <$reader> }
-        =~ /ERROR/
-      )
-    {
-        $return_value{filename} = colored($filename, 'white on_red');
-        $return_value{orig_filename} = $filename;
-        $pm->finish(0, \%return_value);
+    if (do { local $/ = undef; <$reader> } =~ /ERROR/) {
+        $pm->finish(0, { filename => $filename , color => 'white on_red'} );
     }
 
     $pid = open3($writer, $reader, $reader, qq($git_command status));
@@ -141,28 +121,21 @@ for my $file (@files) {
     $git_status = do { local $/ = undef; <$reader> };
 
     if ($git_status =~ /branch is ahead of/) {
-        $return_value{filename} = colored($filename, 'green bold on_yellow');
-        $return_value{orig_filename} = $filename;
-        $pm->finish(0, \%return_value);
-    }
-    elsif ($git_status =~ /branch is behind/) {
-        $return_value{filename} = colored($filename, 'red on_yellow');
-        $return_value{orig_filename} = $filename;
-        $pm->finish(0, \%return_value);
+        $pm->finish(0, { filename => $filename , color => 'green bold on_yellow'} );
+    } elsif ($git_status =~ /branch is behind/) {
+        $pm->finish(0, { filename => $filename , color => 'red on_yellow'} );
     }
 
     # Absolute nothign wrong with this dir
-    $return_value{filename} = $filename;
-    $return_value{orig_filename} = $filename;
-	$pm->finish(0, \%return_value);
+    $pm->finish(0, { filename => $filename });
 }
 $pm->wait_all_children;
 
 # sort using proper unicode sorting method
-#TODO dirs first/dirty first
+#TODO dirs first/dirty first, make it more like ls by sorting column by column
 my $collator = Unicode::Collate->new();
 for my $res(@results){
-    $res->{filename_sort_key} = $collator->getSortKey( $res->{orig_filename} );
+    $res->{filename_sort_key} = $collator->getSortKey( $res->{filename} );
 }
 @results = sort{ $a->{filename_sort_key} cmp $b->{filename_sort_key} } @results;
 
@@ -170,7 +143,7 @@ for my $res(@results){
 
 sub print_in_equal_columns{
     my $max = 0;
-    for(@results){ $max = $_->{length} if $_->{length} > $max; }
+    for(@results){ $max = length($_->{filename}) if length($_->{filename}) > $max; }
 
     $max++; # put space after the widest word
     my $nr_of_columns = int($ENV{COLUMNS}/$max);
@@ -178,10 +151,18 @@ sub print_in_equal_columns{
 
     for( my $y=0;$y<$nr_of_rows; $y++) {
         for( my $x=0;$x <$nr_of_columns; $x++) {
-            if ($y*$nr_of_columns + $x > $#results) {last};
-            # compensate for colored words (color codes adds characters)
-            my $diff = length($results[$y*$nr_of_columns+$x]->{filename}) - $results[$y*$nr_of_columns+$x]->{length};
-            printf("%-*s", $max + $diff , $results[$y*$nr_of_columns+$x]->{filename});
+            last if ( (my $index = $y*$nr_of_columns + $x) > $#results);
+
+            my ($diff, $to_print)=(0, "");
+            if( $results[$index]->{color} ){
+                # compensate for colored words (color codes adds characters)
+                $diff = length( colored( $results[$index]->{filename}, $results[$index]->{color}))
+                         - length($results[$index]->{filename});
+                $to_print = colored( $results[$index]->{filename}, $results[$index]->{color});
+            }else{
+                $to_print = $results[$index]->{filename};
+            }
+            printf("%-*s", $max + $diff , $to_print);
         }
         print "\n";
     }
@@ -192,8 +173,8 @@ sub print_in_better_columns{
     # get a baseline, fill up first row to get a number of columns to work with
     my ($total_width, $nr_of_columns)= (0,0);
     for my $res (@results){
-        last if( $total_width + $res->{length}+1 > $ENV{COLUMNS});
-        $total_width += $res->{length} +1;
+        last if( $total_width + length($res->{filename})+1 > $ENV{COLUMNS});
+        $total_width += length($res->{filename}) +1;
         $nr_of_columns++;
     }
     my $nr_of_rows = ceil(($#results+1)/$nr_of_columns);
@@ -208,8 +189,8 @@ sub print_in_better_columns{
             my $max_column_width = 0;
             for(my $y=0; $y < $nr_of_rows; $y++){
                 last if( (my $index = ($y * $nr_of_columns +$x)) > $#results );
-                if( $results[$index]->{length} > $max_column_width) {
-                    $max_column_width = $results[$index]->{length};
+                if( length($results[$index]->{filename}) > $max_column_width) {
+                    $max_column_width = length($results[$index]->{filename});
                 }
             }
             $width += $max_column_width +2;
@@ -226,8 +207,13 @@ sub print_in_better_columns{
     for( my $y=0;$y<$nr_of_rows; $y++) {
         for( my $x=0;$x <$nr_of_columns; $x++) {
             last if ( (my $index = $y*$nr_of_columns + $x) > $#results);
-            my $diff = length($results[$index]->{filename}) - $results[$index]->{length};
-            printf("%-*s", $column_widths[$x] + $diff +2 , $results[$index]->{filename});
+            my $to_print = $results[$index]->{color} ? colored($results[$index]->{filename}, $results[$index]->{color})
+                                                     : $results[$index]->{filename};
+            my $diff = 0;
+            if($results[$index]->{color}){
+                $diff = length(colored ($results[$index]->{filename} ,$results[$index]->{color})) - length($results[$index]->{filename});
+            }
+            printf("%-*s", $column_widths[$x] + $diff +2 , $to_print);
         }
         print "\n";
     }
