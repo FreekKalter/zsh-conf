@@ -1,11 +1,11 @@
-#!/home/fkalter/perl
+#!/usr/bin/env perl
 use v5.14;
 use Path::Class;
 use File::Spec;
 use Cwd;
 
 my $dir = dir( File::Spec->rel2abs( getcwd ), ".git" );
-my %tmpENV = ( 
+my %tmpENV = (
           'GIT_AUTHOR_NAME' => 'Freek Kalter',
           'PWD' => '/home/fkalter/github/zsh-conf',
           'GIT_PREFIX' => '',

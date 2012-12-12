@@ -1,4 +1,4 @@
-#!/home/fkalter/perl
+#!/usr/bin/env perl
 
 use v5.12;
 use Cwd;

@@ -1,6 +1,6 @@
 # ZSH Theme emulating the Fish shell's default prompt.
 
-local user_color='green'; [ $UID -eq 0 ] && user_color='red'
+local user_color='green';# [ $UID -eq 0 ] && user_color='red'
 PROMPT='%{$fg_bold[blue]%}%n@%m%{$reset_color%} %{$fg[$user_color]%}\
 %~%{$reset_color%}\
 $(git_prompt_info)$(git_prompt_status)\
