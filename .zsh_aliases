@@ -34,6 +34,7 @@ alias la='ls -A'
 alias l='ls -CF'
 alias xx='exit'
 alias s='sudo'
+alias 'ps?'='ps ax | grep '
 
 # global aliases
 alias -g L="| less"
