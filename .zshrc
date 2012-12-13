@@ -12,7 +12,7 @@ bindkey -v
 
 autoload -Uz compinit
 compinit
-setopt completeinword
+setopt complete_in_word
 
 #Type .. instead of cd ..
 setopt auto_cd
