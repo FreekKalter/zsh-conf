@@ -2,7 +2,7 @@
 
 local user_color='green'; # [ $UID -eq 0 ] && user_color='red'
 local host_color='blue';
-if [ -n $SSH_CONNECTION ]; then
+if [[ -n $SSH_CONNECTION ]]; then
     host_color="red"
 fi
 
