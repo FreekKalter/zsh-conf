@@ -30,10 +30,10 @@ my $pm = Parallel::ForkManager->new(30);
 my ($writer, $reader, $err, $pid);
 $err = gensym;
 
-open(my $fh, "<", "/home/fkalter/.git_credentials") or croak "Can't open git credentials: $!";
-my %cred = map{ split /= | \s+/x; } <$fh>;
-my $gh = Net::GitHub::V3->new(\%cred);
-my @repos = map { $_->{name} } $gh->repos->list;
+#open(my $fh, "<", "/home/fkalter/.git_credentials") or croak "Can't open git credentials: $!";
+#my %cred = map{ split /= | \s+/x; } <$fh>;
+#my $gh = Net::GitHub::V3->new(\%cred);
+#my @repos = map { $_->{name} } $gh->repos->list;
 
 my $dir = cwd();
 
