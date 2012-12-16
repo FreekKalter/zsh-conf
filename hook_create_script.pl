@@ -3,9 +3,6 @@
 use v5.12;
 use Cwd;
 use File::Spec;
-use Path::Class;
-
-my $dir = dir( File::Spec->rel2abs( getcwd ), "scripts" );
 
 my $script= qq{#!/bin/sh
 ln -f \$GIT_DIR/../.zshrc ~/.zshrc
@@ -14,7 +11,7 @@ ln -f \$GIT_DIR/../.tmux.conf ~/.tmux.conf
 ln -f \$GIT_DIR/../freek.zsh-theme ~/.oh-my-zsh/themes/freek.zsh-theme
 
 mkdir -p ~/scripts
-ln -sf $dir/*  ~/scripts
+ln -sf \$GIT_DIR/../scripts/*  ~/scripts
 
 echo "Links created"
 };
