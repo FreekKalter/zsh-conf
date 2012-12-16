@@ -8,6 +8,7 @@ use IPC::Open3 qw( open3 );
 
 my $sock = "/home/fkalter/vlc-random.sock";
 my $log  = "/home/fkalter/log.txt";
+my $dir = "/media/truecrypt2/down/";
 my ($read, $write, $pid);
 
 if (-e $sock) {
@@ -20,7 +21,7 @@ else {
     &fork_vlc();
 }
 
-opendir(my $dh, "/data/down");
+opendir(my $dh, $dir);
 my @files = grep { !/^\.{1,2}/x } readdir($dh);
 
 open(my $lh, ">>", $log) or croak "Could not open $log for writing: $!";
@@ -28,7 +29,7 @@ my $rand = irand(scalar @files);
 print $lh "$files[$rand]\n";
 close $lh;
 
-my $to_add = "/data/down/" . $files[$rand];
+my $to_add = $dir . $files[$rand];
 $pid = open3($write, $read, $read, qq( echo "add $to_add" | nc -U $sock ));
 waitpid($pid, 0);
 my $status = do { local $/ = undef; <$read> };
