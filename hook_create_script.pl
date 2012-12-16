@@ -5,11 +5,9 @@ use Cwd;
 use File::Spec;
 
 my $script= qq{#!/bin/sh
-if [ -z \$GIT_DIR ]; then
-    SCRIPT_LOC=\$(readlink -f \$0)
-    SCRIPT_PATH=`dirname \$SCRIPT_LOC`
-    GIT_DIR="\$SCRIPT_PATH/.."
-fi
+SCRIPT_LOC=\$(readlink -f \$0)
+SCRIPT_PATH=`dirname \$SCRIPT_LOC`
+GIT_DIR="\$SCRIPT_PATH/.."
 
 ln -f \$GIT_DIR/../.zshrc ~/.zshrc
 ln -f \$GIT_DIR/../.zsh_aliases ~/.zsh_aliases
