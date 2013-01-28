@@ -10,6 +10,8 @@ setopt extendedglob
 unsetopt beep
 bindkey -v
 
+bindkey '^R' history-incremental-search-backward
+
 autoload -Uz compinit
 compinit
 setopt complete_in_word
