@@ -86,7 +86,7 @@ for my $file (@files) {
     );
     my $address;
 
-    if ($return !~ /^\w+\s+(.*)\s+\(\w+\)$/x) {
+    if (!defined($return) || $return !~ /^\w+\s+(.*)\s+\(\w+\)$/x) {
         $pm->finish(0, { filename => $filename , color => 'blue on_red'} ); # can't parse 'git remote -v' output
     } else {
         $address = $1 =~ s/\.git$//xr;
