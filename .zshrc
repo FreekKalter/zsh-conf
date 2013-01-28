@@ -60,23 +60,24 @@ export COLUMNS=${COLUMNS}
 
 source ~/perl5/perlbrew/etc/bashrc
 
-export PATH=$PATH:~/scripts:/usr/lib/go/bin
+export GOROOT=/usr/local/go
+export PATH=$PATH:~/scripts:$GOROOT/bin
+export GOPATH=~/gopath
 
 # set go env variables
-
-if [[ $(uname) == "Linux" ]]; then
-    export GOROOT="/usr/lib/go"
-    export GOBIN="$GOROOT/bin"
-    export GOARCH="386"
-    export GOCHAR="8"
-    export GOOS="linux"
-    export GOEXE=""
-    export GOHOSTARCH="386"
-    export GOHOSTOS="linux"
-    export GOTOOLDIR="/usr/lib/go/pkg/tool/linux_386"
-    export GOGCCFLAGS="-g -O2 -fPIC -m32 -pthread"
-    export CGO_ENABLED="1"
-fi
+#if [[ $(uname) == "Linux" ]]; then
+#    export GOROOT="/usr/lib/go"
+#    export GOBIN="$GOROOT/bin"
+#    export GOARCH="386"
+#    export GOCHAR="8"
+#    export GOOS="linux"
+#    export GOEXE=""
+#    export GOHOSTARCH="386"
+#    export GOHOSTOS="linux"
+#    export GOTOOLDIR="/usr/lib/go/pkg/tool/linux_386"
+#    export GOGCCFLAGS="-g -O2 -fPIC -m32 -pthread"
+#    export CGO_ENABLED="1"
+#fi
 
 # TMUX
 if [ -z "$SSH_CONNECTION" ]; then
