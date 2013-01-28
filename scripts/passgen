@@ -1,6 +1,5 @@
 #!/usr/bin/env perl
 
-print "$]\n";
 use 5.016000;
 use warnings;
 use strict;
