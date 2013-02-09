@@ -2,16 +2,17 @@
 use 5.016000;
 use warnings;
 use strict;
-use Math::Random::Secure qw( irand );
+
 use Carp;
 use IPC::Open3 qw( open3 );
+use Math::RandomOrg qw( randnum );
 
 my $sock = "/home/fkalter/vlc-random.sock";
 my $log  = "/home/fkalter/log.txt";
 my $dir = "/media/truecrypt2/down/";
 my ($read, $write, $pid);
 
-if (-e $sock) {
+if (-e $sock) { # if vlc does not respond on current sock-file, delete it and create new one
     if (system("echo 'logout' | nc -U $sock")) {
         unlink $sock;
         &fork_vlc();
@@ -23,15 +24,16 @@ else {
 
 opendir(my $dh, $dir);
 my @files = grep { !/^\.{1,2}/x } readdir($dh);
-
 open(my $lh, ">>", $log) or croak "Could not open $log for writing: $!";
-my $rand = irand(scalar @files);
-print $lh "$files[$rand]\n";
+
+my $rand = int ( randnum(0, scalar @files) );
+print $lh  $rand," ",  scalar(@files) , "\n";
 close $lh;
 
 my $to_add = $dir . $files[$rand];
 $pid = open3($write, $read, $read, qq( echo "add $to_add" | nc -U $sock ));
 waitpid($pid, 0);
+
 my $status = do { local $/ = undef; <$read> };
 if ($status =~ /menu select/) {
     $pid = open3($write, $read, $read, qq( echo "pause" | nc -U $sock ));
