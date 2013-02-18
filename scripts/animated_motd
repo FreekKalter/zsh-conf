@@ -1,0 +1,19 @@
+#!/usr/bin/env perl
+
+use v5.12;
+use Carp;
+
+package Random_scalar;
+use Math::Random::Secure qw( irand );
+
+sub TIESCALAR { bless \my $self, shift }
+sub STORE { ${ $_[0] } = $_[1] }
+sub FETCH { return 10 + irand(5); }
+
+package main;
+use IPC::Open3 qw( open3 );
+
+tie my $rand, "Random_scalar";
+my $mess = "Remember, I will be watching you.";
+system( qq( echo $mess | pv -qL $rand ) );
+exec( $ENV{SSH_ORIGINAL_COMMAND} ) or exec( $ENV{SHELL} );
