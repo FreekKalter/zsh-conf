@@ -39,13 +39,12 @@ ZSH_THEME="freek"
 #default editor
 EDITOR=/usr/bin/vim
 #load aliases file
-source ~/.zsh_aliases
 [[ -z ${fpath[(r)$HOME/.zsh/completion]} ]] && fpath=(~/.zsh/completion $fpath)
 
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(git extract vi-mode perl cpanm)
+plugins=(git extract vi-mode perl)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -79,6 +78,7 @@ export GOPATH=~/gopath
 #    export CGO_ENABLED="1"
 #fi
 
+source ~/.zsh_aliases
 # TMUX
 if [ -z "$SSH_CONNECTION" ]; then
     if which tmux 2>&1 >/dev/null; then
@@ -88,3 +88,4 @@ if [ -z "$SSH_CONNECTION" ]; then
 else 
     TERM="linux"
 fi
+
