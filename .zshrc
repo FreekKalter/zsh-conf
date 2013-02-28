@@ -1,7 +1,7 @@
 # Lines configured by zsh-newuser-install
 HISTFILE=~/.histfile
-HISTSIZE=10000
-SAVEHIST=10000
+HISTSIZE=100000000
+SAVEHIST=100000000
 setopt incappendhistory 
 setopt sharehistory
 setopt extendedhistory
@@ -38,7 +38,6 @@ ZSH_THEME="freek"
 
 #default editor
 EDITOR=/usr/bin/vim
-#load aliases file
 [[ -z ${fpath[(r)$HOME/.zsh/completion]} ]] && fpath=(~/.zsh/completion $fpath)
 
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
@@ -57,27 +56,14 @@ export COLUMNS=${COLUMNS}
 # Customize to your needs...
 #export PATH=/home/fkalter/perl5/perlbrew/bin:/home/fkalter/perl5/perlbrew/perls/perl-5.16.0/bin:/usr/lib/lightdm/lightdm:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games
 
-source ~/perl5/perlbrew/etc/bashrc
 
 export GOROOT=/usr/local/go
 export PATH=$PATH:~/scripts:$GOROOT/bin
 export GOPATH=~/gopath
 
-# set go env variables
-#if [[ $(uname) == "Linux" ]]; then
-#    export GOROOT="/usr/lib/go"
-#    export GOBIN="$GOROOT/bin"
-#    export GOARCH="386"
-#    export GOCHAR="8"
-#    export GOOS="linux"
-#    export GOEXE=""
-#    export GOHOSTARCH="386"
-#    export GOHOSTOS="linux"
-#    export GOTOOLDIR="/usr/lib/go/pkg/tool/linux_386"
-#    export GOGCCFLAGS="-g -O2 -fPIC -m32 -pthread"
-#    export CGO_ENABLED="1"
-#fi
+source ~/perl5/perlbrew/etc/bashrc
 
+#load aliases file
 source ~/.zsh_aliases
 # TMUX
 if [ -z "$SSH_CONNECTION" ]; then
