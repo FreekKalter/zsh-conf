@@ -18,6 +18,7 @@ use Carp;
 use Path::Class;
 use Cwd;
 use File::Basename;
+use Getopt::Long;
 use Term::ANSIColor;
 use Net::GitHub::V3;
 use Parallel::ForkManager 0.7.6;
@@ -25,6 +26,29 @@ use IPC::Open3 qw( open3 );
 use Symbol;
 use POSIX qw( floor ceil );
 use Unicode::Collate;
+
+my $help = '';
+GetOptions( 'help' => \$help);
+
+my %colors = (
+    "dirty" => 'red bold',
+    "no_version_control" => 'blue bold',
+    "no_remote" => 'blue on_red',
+    "fetch_failed" => 'white on_red',
+    "branch_ahead" => 'green bold on_yellow',
+    "branch_behind" => 'red on_yellow',
+);
+
+if ($help){
+    say "\tAll up to date\n";
+    say colored("\tNot under version control\n", $colors{no_version_control});
+    say colored("\tDirty work directory\n", $colors{dirty});
+    say colored("\tNo (known) remote\n", $colors{no_remote} );
+    say colored("\tCould not fetch from remote\n", $colors{fetch_failed} );
+    say colored("\tBranch ahead of remote\n", $colors{branch_ahead});
+    say colored("\tBranch behind remote\n", $colors{branch_behind});
+    exit 0;
+}
 
 my $pm = Parallel::ForkManager->new(30);
 my ($writer, $reader, $err, $pid);
@@ -62,7 +86,7 @@ for my $file (@files) {
 
     # not under version control
     if (not -e dir($file, ".git")) {
-        $pm->finish(0, { filename => $filename , color => 'blue bold'} );
+        $pm->finish(0, { filename => $filename , state => 'no_version_control'} );
     }
 
     # get git status
@@ -74,7 +98,7 @@ for my $file (@files) {
     if ($git_status !~ /nothing to commit/) {
 
         # uncommitted changes (dirty working dir)
-        $pm->finish(0, { filename => $filename , color => 'red bold'} );
+        $pm->finish(0, { filename => $filename , state => 'dirty'} );
     }
 
     # check if remote exists
@@ -87,12 +111,12 @@ for my $file (@files) {
     my $address;
 
     if (!defined($return) || $return !~ /^\w+\s+(.*)\s+\(\w+\)$/x) {
-        $pm->finish(0, { filename => $filename , color => 'blue on_red'} ); # can't parse 'git remote -v' output
+        $pm->finish(0, { filename => $filename , state => 'no_remote'} ); # can't parse 'git remote -v' output
     } else {
         $address = $1 =~ s/\.git$//xr;
     }
     if ($address !~ /^http/x && $address !~ /^git\@bitbucket/x && $address !~ /^git\@github/x && $address !~ /^ssh/x) {
-        $pm->finish(0, { filename => $filename , color => 'blue on_red '} ); # can't parse 'git remote -v' output
+        $pm->finish(0, { filename => $filename , state => 'no_remote'} ); # can't parse 'git remote -v' output
     }
 
     # filter out remotes we cannot fetch from and print the in red background with white letters
@@ -102,7 +126,7 @@ for my $file (@files) {
         my $head = <$reader>;
         if (!$head || $head !~ /200/x) {
             # no internet or something else
-            $pm->finish(0, { filename => $filename , color => 'white on_red'} );
+            $pm->finish(0, { filename => $filename , state => 'fetch_failed'} );
         }
     }
 
@@ -113,7 +137,7 @@ for my $file (@files) {
     # if remote turns out to slip through earlyer checks
     # (stil print white on red to indicate remote problems)
     if (do { local $/ = undef; <$reader> } =~ /ERROR/) {
-        $pm->finish(0, { filename => $filename , color => 'white on_red'} );
+        $pm->finish(0, { filename => $filename , state => 'fetch failed'} );
     }
 
     $pid = open3($writer, $reader, $reader, qq($git_command status));
@@ -121,9 +145,9 @@ for my $file (@files) {
     $git_status = do { local $/ = undef; <$reader> };
 
     if ($git_status =~ /branch is ahead of/) {
-        $pm->finish(0, { filename => $filename , color => 'green bold on_yellow'} );
+        $pm->finish(0, { filename => $filename , state => 'branch_ahead' } );
     } elsif ($git_status =~ /branch is behind/) {
-        $pm->finish(0, { filename => $filename , color => 'red on_yellow'} );
+        $pm->finish(0, { filename => $filename , state => 'branch_behind'} );
     }
 
     # Absolute nothign wrong with this dir
@@ -154,11 +178,11 @@ sub print_in_equal_columns{
             last if ( (my $index = $y*$nr_of_columns + $x) > $#results);
 
             my ($diff, $to_print)=(0, "");
-            if( $results[$index]->{color} ){
+            if( $results[$index]->{state} ){
                 # compensate for colored words (color codes adds characters)
-                $diff = length( colored( $results[$index]->{filename}, $results[$index]->{color}))
+                $diff = length( colored( $results[$index]->{filename}, $colors{$results[$index]->{state}}))
                          - length($results[$index]->{filename});
-                $to_print = colored( $results[$index]->{filename}, $results[$index]->{color});
+                $to_print = colored( $results[$index]->{filename}, $colors{$results[$index]->{state}} );
             }else{
                 $to_print = $results[$index]->{filename};
             }
@@ -207,22 +231,14 @@ sub print_in_better_columns{
     for( my $y=0;$y<$nr_of_rows; $y++) {
         for( my $x=0;$x <$nr_of_columns; $x++) {
             last if ( (my $index = $y*$nr_of_columns + $x) > $#results);
-            my $to_print = $results[$index]->{color} ? colored($results[$index]->{filename}, $results[$index]->{color})
+            my $to_print = $results[$index]->{state} ? colored($results[$index]->{filename}, $colors{$results[$index]->{state}})
                                                      : $results[$index]->{filename};
             my $diff = 0;
-            if($results[$index]->{color}){
-                $diff = length(colored ($results[$index]->{filename} ,$results[$index]->{color})) - length($results[$index]->{filename});
+            if($results[$index]->{state}){
+                $diff = length(colored ($results[$index]->{filename} ,$colors{$results[$index]->{state}})) - length($results[$index]->{filename});
             }
             printf("%-*s", $column_widths[$x] + $diff +2 , $to_print);
         }
         print "\n";
     }
 }
-=cut
-color scheme
-    Not under version control:  blue
-    Uncommitted changes:        red
-
-    behind remote:              red on yellow
-    ahead of remote:            green on yellow
-	this can cause trouble with some pod utilities
