@@ -62,6 +62,7 @@ export PATH=$PATH:~/scripts:$GOROOT/bin
 export GOPATH=~/gopath
 
 source ~/perl5/perlbrew/etc/bashrc
+source $GOROOT/misc/zsh/go
 
 #load aliases file
 source ~/.zsh_aliases
