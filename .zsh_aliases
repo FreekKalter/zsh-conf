@@ -51,3 +51,8 @@ function fmuc()
 {
     cat ~/.zsh_history | perl -ne 's/^.*;//;$h{$_}++; END{@s=sort{$h{$b}<=>$h{$a}}keys %h;for($i=0;$i<10;$i++){print $s[$i];}}'
 }
+
+function linesInCodebase()
+{
+    find . -path ./.git -prune -o -path ./.hg -prune -o -type f ! -executable -regextype posix-egrep ! -regex '.*(jpg|png|gif|\.a)' -print | xargs cat | wc -l
+}
