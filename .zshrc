@@ -14,10 +14,10 @@ bindkey '^R' history-incremental-search-backward
 
 setopt complete_in_word
 
-#Type .. instead of cd ..
+# Type .. instead of cd ..
 setopt auto_cd
 
-#Display CPU usage stats for commands taking more than 10 seconds
+# Display CPU usage stats for commands taking more than 10 seconds
 REPORTTIME=10
 # oh my zsh from here on down
 # Path to your oh-my-zsh configuration.
@@ -31,7 +31,7 @@ bindkey -M viins 'jk' vi-cmd-mode
 # Look in ~/.oh-my-zsh/themes/
 # Optionally, if you set this to "random", it'll load a random theme each
 # time that oh-my-zsh is loaded.
-#ZSH_THEME="fishy"
+# ZSH_THEME="fishy"
 ZSH_THEME="freek"
 
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
@@ -53,7 +53,7 @@ export EDITOR='vim'
 export COLUMNS=${COLUMNS}
 
 # Customize to your needs...
-#export PATH=/home/fkalter/perl5/perlbrew/bin:/home/fkalter/perl5/perlbrew/perls/perl-5.16.0/bin:/usr/lib/lightdm/lightdm:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games
+# export PATH=/home/fkalter/perl5/perlbrew/bin:/home/fkalter/perl5/perlbrew/perls/perl-5.16.0/bin:/usr/lib/lightdm/lightdm:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games
 
 
 export GOROOT=/usr/local/go
@@ -63,7 +63,7 @@ export GOPATH=~/gopath
 source ~/perl5/perlbrew/etc/bashrc
 source $GOROOT/misc/zsh/go
 
-#load aliases file
+# load aliases file
 source ~/.zsh_aliases
 # TMUX
 if [ -z "$SSH_CONNECTION" ]; then
