@@ -12,8 +12,6 @@ bindkey -v
 
 bindkey '^R' history-incremental-search-backward
 
-autoload -Uz compinit
-compinit
 setopt complete_in_word
 
 #Type .. instead of cd ..
@@ -36,10 +34,6 @@ bindkey -M viins 'jk' vi-cmd-mode
 #ZSH_THEME="fishy"
 ZSH_THEME="freek"
 
-#default editor
-EDITOR=/usr/bin/vim
-[[ -z ${fpath[(r)$HOME/.zsh/completion]} ]] && fpath=(~/.zsh/completion $fpath)
-
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
@@ -47,9 +41,14 @@ plugins=(git extract vi-mode perl)
 
 source $ZSH/oh-my-zsh.sh
 
+fpath=(~/.zsh/completion $fpath)
+
+autoload -Uz compinit
+compinit
+
 # no freaking auto correct
 unsetopt correct_all
-export VISUAL='vim'
+export VISUAL='gvim'
 export EDITOR='vim'
 export COLUMNS=${COLUMNS}
 

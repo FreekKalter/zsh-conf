@@ -20,7 +20,8 @@ alias awk='gawk --re-interval'
 # git shortcuts
 alias gs='git status'
 alias glog='git log --decorate --graph --oneline -5'
-alias v='vim'
+# alias v='vim'
+function v () { gvim --remote-silent $@ || gvim; }
 alias gd='git diff'
 
 # coloring
@@ -34,7 +35,8 @@ alias la='ls -A'
 alias l='ls -CF'
 alias xx='exit'
 alias s='sudo'
-alias 'ps?'='ps ax | grep '
+alias 'ps?'='ps ax | grep -v grep | grep "$@" -i --color=auto'
+function fname() { find . -iname "*$@*" }
 
 # global aliases
 alias -g L="| less"
