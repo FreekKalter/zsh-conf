@@ -7,6 +7,8 @@ use File::Copy;
 for( qw(post-commit  post-merge) ){
     my $file = ".git/hooks/$_";
     copy("template.sh", $file);
-    `chmod +x $file`;
+    system("chmod", "+x", $file) == 0 or die "Can't change permission on $file: $!" ;
 };
 say "Hooks created";
+
+system(".git/hooks/post-commit") ==0 or die "Can't execute post-commit hook: $?";
