@@ -48,7 +48,7 @@ compinit
 
 # no freaking auto correct
 unsetopt correct_all
-export VISUAL='gvim'
+export VISUAL='gvim -f'
 export EDITOR='vim'
 export COLUMNS=${COLUMNS}
 
@@ -56,9 +56,10 @@ export COLUMNS=${COLUMNS}
 # export PATH=/home/fkalter/perl5/perlbrew/bin:/home/fkalter/perl5/perlbrew/perls/perl-5.16.0/bin:/usr/lib/lightdm/lightdm:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games
 
 
-export GOROOT=/usr/local/go
-export PATH=$PATH:~/scripts:$GOROOT/bin
+export GOROOT=~/go
 export GOPATH=~/gopath
+
+export PATH=$PATH:~/scripts:$GOROOT/bin:$GOPATH/bin
 
 source ~/perl5/perlbrew/etc/bashrc
 source $GOROOT/misc/zsh/go
