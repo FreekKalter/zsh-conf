@@ -55,14 +55,16 @@ export COLUMNS=${COLUMNS}
 # Customize to your needs...
 # export PATH=/home/fkalter/perl5/perlbrew/bin:/home/fkalter/perl5/perlbrew/perls/perl-5.16.0/bin:/usr/lib/lightdm/lightdm:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games
 
+if [ -d ~/go ] && [ -d ~/gopath ]; then
+    export GOROOT=~/go
+    export GOPATH=~/gopath
+    export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+    source $GOROOT/misc/zsh/go
+fi
 
-export GOROOT=~/go
-export GOPATH=~/gopath
-
-export PATH=$PATH:~/scripts:$GOROOT/bin:$GOPATH/bin
+export PATH=$PATH:~/scripts
 
 source ~/perl5/perlbrew/etc/bashrc
-source $GOROOT/misc/zsh/go
 
 # load aliases file
 source ~/.zsh_aliases
