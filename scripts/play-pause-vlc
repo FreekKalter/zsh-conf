@@ -1,2 +1,6 @@
-#!/bin/sh
-echo "pause" | nc -U /home/fkalter/vlc.sock
+#!/bin/bash
+if [ -S /home/fkalter/vlc.sock ]; then
+    echo "pause" | nc -U /home/fkalter/vlc.sock
+elif [ "$(pidof parole)" ]; then
+    parole --play
+fi
