@@ -66,6 +66,8 @@ export PATH=$PATH:~/scripts
 
 source ~/perl5/perlbrew/etc/bashrc
 
+eval "$(fasd --init auto)"
+
 # load aliases file
 source ~/.zsh_aliases
 # TMUX
