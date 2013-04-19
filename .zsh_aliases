@@ -8,20 +8,27 @@ alias gs='git status'
 alias gd='git diff'
 alias glog='git log --decorate --graph --oneline -5'
 
+OS=`uname -s`
+if [ $OS = "Darwin" ]; then
+    vimCmd="mvim"
+elif [ $OS = "Linux" ]; then
+    vimCmd="gvim"
+fi
+
 # vim shortcuts
 function v () { 
     if [[ $# -gt 0 ]]; then
-        gvim --remote-silent $@
+        $vimCmd --remote-silent $@
     else
-        gvim
+        $vimCmd
     fi
 }
 ## Start vim with session file, standard Session.vim if none specified.
 function vs () { 
     if [[ $# -gt 0 ]]; then
-        gvim -S $@
+        $vimCmd -S $@
     else
-        gvim -S Session.vim
+        $vimCmd -S Session.vim
     fi
 }
 
