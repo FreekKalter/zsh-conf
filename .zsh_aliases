@@ -6,7 +6,7 @@ alias awk='gawk --re-interval'
 # git shortcuts
 alias gs='git status'
 alias gd='git diff'
-alias glog='git log --decorate --graph --oneline -5'
+alias glog='git --no-pager log --decorate --graph --oneline -10'
 
 OS=`uname -s`
 if [ $OS = "Darwin" ]; then
