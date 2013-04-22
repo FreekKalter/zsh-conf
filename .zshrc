@@ -70,6 +70,7 @@ eval "$(fasd --init auto)"
 
 # load aliases file
 source ~/.zsh_aliases
+
 # TMUX
 if [ -z "$SSH_CONNECTION" ]; then
     if which tmux 2>&1 >/dev/null; then
