@@ -55,11 +55,13 @@ export COLUMNS=${COLUMNS}
 # Customize to your needs...
 # export PATH=/home/fkalter/perl5/perlbrew/bin:/home/fkalter/perl5/perlbrew/perls/perl-5.16.0/bin:/usr/lib/lightdm/lightdm:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games
 
-if [ -d ~/go ] && [ -d ~/gopath ]; then
-    export GOROOT=~/go
-    export GOPATH=~/gopath
-    export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
-    source $GOROOT/misc/zsh/go
+export GO_ROOT=~/go # not GOROOT cause go will set that itself
+export GOPATH=~/gopath
+
+if [ -d $GO_ROOT ] && [ -d $GOPATH ]; then
+    export PATH=$PATH:$GO_ROOT/bin:$GOPATH/bin
+    # commandline completion
+    source $GO_ROOT/misc/zsh/go
 fi
 
 export PATH=$PATH:~/scripts
