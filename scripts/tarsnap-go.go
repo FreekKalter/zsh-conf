@@ -3,12 +3,15 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
+	"os/signal"
 	"regexp"
 	"sort"
 	"strconv"
+	"syscall"
 	"time"
 )
 
@@ -30,10 +33,21 @@ func (d BackupList) Less(i, j int) bool { return d[i].Date.Before(d[j].Date) }
 var prefix string
 var nrOfBackups int
 var configFileLocation string
+var process *os.Process
 
 const dateFormat = "2006-01-02"
 
 func main() {
+	gracefullExit := make(chan os.Signal, 1)
+	signal.Notify(gracefullExit, os.Interrupt, os.Kill, syscall.SIGTERM, syscall.SIGQUIT)
+	go func(c chan os.Signal) {
+		<-c
+		if process != nil {
+			process.Signal(syscall.SIGQUIT)
+		}
+
+	}(gracefullExit)
+
 	ParseCommandLine()
 	CallTarsnap()
 	if len(ListArchivesWithPrefix()) > nrOfBackups {
@@ -46,7 +60,7 @@ func ParseCommandLine() {
 	for i, f := range os.Args {
 		if f == "-f" {
 			prefix = os.Args[i+1]
-			os.Args[i+1] += "-" + time.Now().Add(-100 * time.Hour).Format(dateFormat)
+			os.Args[i+1] += "-" + time.Now().Format(dateFormat)
 		}
 		if f == "--nr-backups" {
 			var err error
@@ -69,9 +83,22 @@ func ParseCommandLine() {
 func CallTarsnap() {
 	cmd := exec.Command("tarsnap", os.Args[1:]...)
 	fmt.Println(cmd.Args)
-	out, err := cmd.CombinedOutput()
+
+	stdErr, err := cmd.StderrPipe()
 	if err != nil {
-		log.Fatal(err, " ", string(out))
+		log.Fatal(err)
+	}
+
+	if err := cmd.Start(); err != nil {
+		log.Fatal(err)
+	}
+	cmd.Start()
+	// save process
+	process = cmd.Process
+
+	if err := cmd.Wait(); err != nil {
+		errOutput, _ := ioutil.ReadAll(stdErr)
+		log.Fatal(err, " ", string(errOutput))
 	}
 }
 
