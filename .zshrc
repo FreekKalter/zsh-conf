@@ -63,6 +63,7 @@ if [ -d ~/go ] && [ -d ~/gopath ]; then
 fi
 
 export PATH=$PATH:~/scripts
+export PATH=$PATH:/usr/local/sbin
 
 source ~/perl5/perlbrew/etc/bashrc
 
