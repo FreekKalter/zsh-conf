@@ -30,7 +30,7 @@ opendir(my $dh, $dir);
 my @files = grep { !/^\.{1,2}/x } readdir($dh);
 open(my $lh, ">>", $log) or croak "Could not open $log for writing: $!";
 
-print $lh  $rand," ",  scalar(@files) , "\n";
+print $lh  $files[$rand], "\n";
 close $lh;
 
 my $to_add = $dir . $files[$rand];
