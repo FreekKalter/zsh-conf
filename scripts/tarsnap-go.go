@@ -41,9 +41,12 @@ func main() {
 	gracefullExit := make(chan os.Signal, 1)
 	signal.Notify(gracefullExit, os.Interrupt, os.Kill, syscall.SIGTERM, syscall.SIGQUIT)
 	go func(c chan os.Signal) {
-		<-c
+        signal := <-c
+        fmt.Println("caught signal:", signal)
 		if process != nil {
+            fmt.Println("gracefull exit")
 			process.Signal(syscall.SIGQUIT)
+            process.Wait()
 		}
 
 	}(gracefullExit)
