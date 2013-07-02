@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -42,9 +41,9 @@ func main() {
 	signal.Notify(gracefullExit, os.Interrupt, os.Kill, syscall.SIGTERM, syscall.SIGQUIT)
 	go func(c chan os.Signal) {
         signal := <-c
-        fmt.Println("caught signal:", signal)
+        log.Println("caught signal:", signal)
 		if process != nil {
-            fmt.Println("gracefull exit")
+            log.Println("gracefull exit")
 			process.Signal(syscall.SIGQUIT)
             process.Wait()
 		}
@@ -85,12 +84,12 @@ func ParseCommandLine() {
 
 func CallTarsnap() {
 	cmd := exec.Command("tarsnap", os.Args[1:]...)
-	fmt.Println(cmd.Args)
+	log.Println(cmd.Args)
 
-	stdErr, err := cmd.StderrPipe()
-	if err != nil {
-		log.Fatal(err)
-	}
+    // combine stderr and stdout in one buffer
+	var b bytes.Buffer
+	cmd.Stdout = &b
+	cmd.Stderr = &b
 
 	if err := cmd.Start(); err != nil {
 		log.Fatal(err)
@@ -100,9 +99,10 @@ func CallTarsnap() {
 	process = cmd.Process
 
 	if err := cmd.Wait(); err != nil {
-		errOutput, _ := ioutil.ReadAll(stdErr)
-		log.Fatal(err, " ", string(errOutput))
+		Output := b.Bytes()
+		log.Fatal(err, " ", string(Output))
 	}
+    //Todo: check if error is "archive already exists", and act on that with prefix.1-date 
 }
 
 func ListArchivesWithPrefix() [][]byte {
@@ -157,7 +157,7 @@ func DeleteOldest() {
 		if backups[i].Part {
 			oldest = oldest + ".part"
 		}
-		fmt.Println("Delete:", oldest)
+		log.Println("Delete:", oldest)
 
 		cmd := exec.Command("tarsnap", "--configfile", configFileLocation, "-d", "-f", oldest)
 		out, err := cmd.CombinedOutput()
