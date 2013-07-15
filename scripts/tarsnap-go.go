@@ -21,6 +21,7 @@ type Config struct {
 type Backup struct {
 	Date time.Time
 	Part bool
+    Suffix string
 }
 
 type BackupList []Backup
@@ -84,7 +85,7 @@ func ParseCommandLine() {
 	}
 }
 
-func CallTarsnap() {
+func CallTarsnap() error{
     // build argruments to exec.command
     arguments := append([]string{ "-f "+filename }, os.Args[1:]...)
 	cmd := exec.Command("tarsnap", arguments...)
@@ -107,11 +108,12 @@ func CallTarsnap() {
 		output := b.Bytes()
         if archiveExistsRegex.Match(output){
             filename += ".2"
-            CallTarsnap()
+            return CallTarsnap()
         }
-		log.Fatal(err, " ", string(output))
+        log.Println(err, " ", string(output))
+        return err
 	}
-    //Todo: check if error is "archive already exists", and act on that with prefix.1-date 
+    return nil
 }
 
 func ListArchivesWithPrefix() [][]byte {
@@ -138,7 +140,7 @@ func DeleteOldest() {
 	}
 
 	// extract dates
-	dateRegex := regexp.MustCompile(prefix + `-(\d{4}-\d{2}-\d{2})(\.part)?$`)
+	dateRegex := regexp.MustCompile(prefix + `-(\d{4}-\d{2}-\d{2})(\.\d)?(\.part)?$`)
 	var backups BackupList
 	found := false
 	for _, line := range archives {
@@ -151,7 +153,7 @@ func DeleteOldest() {
 		if err != nil {
 			panic(err)
 		}
-		backups = append(backups, Backup{Date: date, Part: (string(match[2]) == ".part")})
+        backups = append(backups, Backup{Date: date, Suffix: string(match[2]), Part: (string(match[3]) == ".part")})
 	}
 	if !found {
 		log.Fatal("no backup wiht name: ", prefix)
@@ -166,6 +168,7 @@ func DeleteOldest() {
 		if backups[i].Part {
 			oldest = oldest + ".part"
 		}
+        oldest += backups[i].Suffix
 		log.Println("Delete:", oldest)
 
 		cmd := exec.Command("tarsnap", "--configfile", configFileLocation, "-d", "-f", oldest)
