@@ -30,6 +30,7 @@ func (d BackupList) Len() int           { return len(d) }
 func (d BackupList) Less(i, j int) bool { return d[i].Date.Before(d[j].Date) }
 
 var prefix string
+var filename string
 var nrOfBackups int
 var configFileLocation string
 var process *os.Process
@@ -62,7 +63,8 @@ func ParseCommandLine() {
 	for i, f := range os.Args {
 		if f == "-f" {
 			prefix = os.Args[i+1]
-			os.Args[i+1] += "-" + time.Now().Format(dateFormat)
+			filename = os.Args[i+1] + "-" + time.Now().Format(dateFormat)
+			os.Args = append(os.Args[:i], os.Args[i+2:]...)
 		}
 		if f == "--nr-backups" {
 			var err error
@@ -83,7 +85,9 @@ func ParseCommandLine() {
 }
 
 func CallTarsnap() {
-	cmd := exec.Command("tarsnap", os.Args[1:]...)
+    // build argruments to exec.command
+    arguments := append([]string{ "-f "+filename }, os.Args[1:]...)
+	cmd := exec.Command("tarsnap", arguments...)
 	log.Println(cmd.Args)
 
     // combine stderr and stdout in one buffer
@@ -98,9 +102,14 @@ func CallTarsnap() {
 	// save process
 	process = cmd.Process
 
+    archiveExistsRegex := regexp.MustCompile("^tarsnap: An archive already exists with the name .*")
 	if err := cmd.Wait(); err != nil {
-		Output := b.Bytes()
-		log.Fatal(err, " ", string(Output))
+		output := b.Bytes()
+        if archiveExistsRegex.Match(output){
+            filename += ".2"
+            CallTarsnap()
+        }
+		log.Fatal(err, " ", string(output))
 	}
     //Todo: check if error is "archive already exists", and act on that with prefix.1-date 
 }
