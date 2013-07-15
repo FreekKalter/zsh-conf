@@ -19,9 +19,9 @@ type Config struct {
 }
 
 type Backup struct {
-	Date time.Time
-	Part bool
-    Suffix string
+	Date   time.Time
+	Part   bool
+	Suffix string
 }
 
 type BackupList []Backup
@@ -42,12 +42,12 @@ func main() {
 	gracefullExit := make(chan os.Signal, 1)
 	signal.Notify(gracefullExit, os.Interrupt, os.Kill, syscall.SIGTERM, syscall.SIGQUIT)
 	go func(c chan os.Signal) {
-        signal := <-c
-        log.Println("caught signal:", signal)
+		signal := <-c
+		log.Println("caught signal:", signal)
 		if process != nil {
-            log.Println("gracefull exit")
+			log.Println("gracefull exit")
 			process.Signal(syscall.SIGQUIT)
-            process.Wait()
+			process.Wait()
 		}
 
 	}(gracefullExit)
@@ -61,22 +61,27 @@ func main() {
 
 func ParseCommandLine() {
 	// parse archive name / prefix
-	for i, f := range os.Args {
-		if f == "-f" {
+	for i := 0; i < len(os.Args); i++ {
+		if os.Args[i] == "-f" {
 			prefix = os.Args[i+1]
 			filename = os.Args[i+1] + "-" + time.Now().Format(dateFormat)
+			fmt.Println(os.Args)
 			os.Args = append(os.Args[:i], os.Args[i+2:]...)
+            continue
 		}
-		if f == "--nr-backups" {
+		if os.Args[i] == "--nr-backups" {
 			var err error
 			nrOfBackups, err = strconv.Atoi(os.Args[i+1])
+            fmt.Println(nrOfBackups)
 			if err != nil {
 				log.Fatal("--nr-backups must be integer")
 			}
 			os.Args = append(os.Args[:i], os.Args[i+2:]...)
+            continue
 		}
-		if f == "--configfile" {
+		if os.Args[i] == "--configfile" {
 			configFileLocation = os.Args[i+1]
+            continue
 		}
 	}
 
@@ -85,13 +90,13 @@ func ParseCommandLine() {
 	}
 }
 
-func CallTarsnap() error{
-    // build argruments to exec.command
-    arguments := append([]string{ "-f "+filename }, os.Args[1:]...)
+func CallTarsnap() error {
+	// build argruments to exec.command
+	arguments := append([]string{"-f " + filename}, os.Args[1:]...)
 	cmd := exec.Command("tarsnap", arguments...)
 	log.Println(cmd.Args)
 
-    // combine stderr and stdout in one buffer
+	// combine stderr and stdout in one buffer
 	var b bytes.Buffer
 	cmd.Stdout = &b
 	cmd.Stderr = &b
@@ -103,17 +108,17 @@ func CallTarsnap() error{
 	// save process
 	process = cmd.Process
 
-    archiveExistsRegex := regexp.MustCompile("^tarsnap: An archive already exists with the name .*")
+	archiveExistsRegex := regexp.MustCompile("^tarsnap: An archive already exists with the name .*")
 	if err := cmd.Wait(); err != nil {
 		output := b.Bytes()
-        if archiveExistsRegex.Match(output){
-            filename += ".2"
-            return CallTarsnap()
-        }
-        log.Println(err, " ", string(output))
-        return err
+		if archiveExistsRegex.Match(output) {
+			filename += ".2"
+			return CallTarsnap()
+		}
+		log.Println(err, " ", string(output))
+		return err
 	}
-    return nil
+	return nil
 }
 
 func ListArchivesWithPrefix() [][]byte {
@@ -153,7 +158,7 @@ func DeleteOldest() {
 		if err != nil {
 			panic(err)
 		}
-        backups = append(backups, Backup{Date: date, Suffix: string(match[2]), Part: (string(match[3]) == ".part")})
+		backups = append(backups, Backup{Date: date, Suffix: string(match[2]), Part: (string(match[3]) == ".part")})
 	}
 	if !found {
 		log.Fatal("no backup wiht name: ", prefix)
@@ -168,7 +173,7 @@ func DeleteOldest() {
 		if backups[i].Part {
 			oldest = oldest + ".part"
 		}
-        oldest += backups[i].Suffix
+		oldest += backups[i].Suffix
 		log.Println("Delete:", oldest)
 
 		cmd := exec.Command("tarsnap", "--configfile", configFileLocation, "-d", "-f", oldest)
