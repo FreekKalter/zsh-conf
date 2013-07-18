@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"github.com/stathat/go"
 	"log"
 	"os"
 	"os/exec"
@@ -10,6 +11,7 @@ import (
 	"regexp"
 	"sort"
 	"strconv"
+	"strings"
 	"syscall"
 	"time"
 )
@@ -63,25 +65,23 @@ func ParseCommandLine() {
 	// parse archive name / prefix
 	for i := 0; i < len(os.Args); i++ {
 		if os.Args[i] == "-f" {
-			prefix = os.Args[i+1]
-			filename = os.Args[i+1] + "-" + time.Now().Format(dateFormat)
-			fmt.Println(os.Args)
+			prefix = strings.Trim(os.Args[i+1], " ")
+			filename = prefix + "-" + time.Now().Format(dateFormat)
 			os.Args = append(os.Args[:i], os.Args[i+2:]...)
-            continue
+			continue
 		}
 		if os.Args[i] == "--nr-backups" {
 			var err error
 			nrOfBackups, err = strconv.Atoi(os.Args[i+1])
-            fmt.Println(nrOfBackups)
 			if err != nil {
 				log.Fatal("--nr-backups must be integer")
 			}
 			os.Args = append(os.Args[:i], os.Args[i+2:]...)
-            continue
+			continue
 		}
 		if os.Args[i] == "--configfile" {
 			configFileLocation = os.Args[i+1]
-            continue
+			continue
 		}
 	}
 
@@ -91,8 +91,9 @@ func ParseCommandLine() {
 }
 
 func CallTarsnap() error {
+    fmt.Println(filename)
 	// build argruments to exec.command
-	arguments := append([]string{"-f " + filename}, os.Args[1:]...)
+	arguments := append([]string{"-f" + filename}, os.Args[1:]...)
 	cmd := exec.Command("tarsnap", arguments...)
 	log.Println(cmd.Args)
 
@@ -109,16 +110,48 @@ func CallTarsnap() error {
 	process = cmd.Process
 
 	archiveExistsRegex := regexp.MustCompile("^tarsnap: An archive already exists with the name .*")
+    var output []byte
 	if err := cmd.Wait(); err != nil {
-		output := b.Bytes()
+		output = b.Bytes()
 		if archiveExistsRegex.Match(output) {
 			filename += ".2"
 			return CallTarsnap()
+		} else {
+			parseStats(output)
 		}
 		log.Println(err, " ", string(output))
 		return err
 	}
+	parseStats(output)
 	return nil
+}
+
+func parseStats(tarsnapOutput []byte) {
+    fmt.Println("tarsnapOutput:", string(tarsnapOutput))
+	// get last line of output ( these are the stats )
+	index := bytes.Index(tarsnapOutput, []byte("This archive"))
+
+	numbersRegex := regexp.MustCompile(`This archive\s+(\d+)\s+(\d+)`)
+	matches := numbersRegex.FindSubmatch(tarsnapOutput[index:])
+
+	uncompressed, err := strconv.ParseFloat(string(matches[1]), 64)
+	if err != nil {
+		panic(err)
+	}
+	compressed, err := strconv.ParseFloat(string(matches[2]), 64)
+	if err != nil {
+		panic(err)
+	}
+	err = stathat.PostEZValue(prefix+" archive size", "freek@kalteronline.org", uncompressed)
+	if err != nil {
+		panic(err)
+	}
+	err = stathat.PostEZValue(prefix+" archive size compressed", "freek@kalteronline.org", compressed)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(prefix+" archive size", "freek@kalteronline.org", uncompressed)
+	fmt.Println(prefix+" archive size compressed", "freek@kalteronline.org", compressed)
 }
 
 func ListArchivesWithPrefix() [][]byte {
@@ -130,9 +163,9 @@ func ListArchivesWithPrefix() [][]byte {
 	}
 	var filtered [][]byte
 	prefixRegex := regexp.MustCompile(prefix + ".*")
-	for _, a := range bytes.Fields(out) {
-		if prefixRegex.Match(a) {
-			filtered = append(filtered, a)
+	for _, s := range bytes.Split(out, []byte("\n")) {
+		if prefixRegex.Match(s) {
+			filtered = append(filtered, s)
 		}
 	}
 	return filtered
