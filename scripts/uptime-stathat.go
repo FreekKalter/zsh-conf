@@ -2,8 +2,8 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/stathat/go"
+	"log"
 	"os"
 	"os/exec"
 	"regexp"
@@ -15,7 +15,7 @@ func main() {
 	cmd := exec.Command("uptime")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	uptimeRegex := regexp.MustCompile(`.*up\s+(\d+:\d+).*`)
 	matches := uptimeRegex.FindSubmatch(output)
@@ -28,18 +28,18 @@ func main() {
 		i := bytes.IndexByte(matches[1], byte(':'))
 		hours, err := strconv.ParseInt(string(matches[1][:i]), 10, 64)
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 		minutes, err := strconv.ParseInt(string(matches[1][i+1:]), 10, 64)
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 		hourStat = float64(hours) + float64(minutes)/60
 	} else if matches = justMinutesRegex.FindSubmatch(output); len(matches) > 0 {
 		var err error
 		minutes, err := strconv.ParseFloat(string(matches[1]), 64)
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 		hourStat = float64(minutes) / 60
 	}
@@ -49,10 +49,10 @@ func main() {
 	if err != nil {
 		hostname = ""
 	}
-	fmt.Println(hourStat, hostname)
+	log.Println(hourStat, hostname)
 	err = stathat.PostEZValue("uptime@"+hostname, "freek@kalteronline.org", hourStat)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	// wait for a maximum of 20 seconds for request to complete
