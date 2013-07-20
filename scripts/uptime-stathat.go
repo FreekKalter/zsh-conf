@@ -2,11 +2,13 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/stathat/go"
+	"os"
 	"os/exec"
 	"regexp"
 	"strconv"
-    "time"
+	"time"
 )
 
 func main() {
@@ -17,35 +19,42 @@ func main() {
 	}
 	uptimeRegex := regexp.MustCompile(`.*up\s+(\d+:\d+).*`)
 	matches := uptimeRegex.FindSubmatch(output)
-    justMinutesRegex := regexp.MustCompile(`.*up\s+(\d+)\s+\min.*`)
+	justMinutesRegex := regexp.MustCompile(`.*up\s+(\d+)\s+min.*`)
 
 	// find index of :
 	// everythin before : is hours
-	i := bytes.IndexByte(matches[1], byte(':'))
-    var stat float64
-    if i >= 0 {
-        hours, err := strconv.ParseInt(string(matches[1][:i]), 10, 64)
-        if err != nil {
-            panic(err)
-        }
-        minutes, err := strconv.ParseInt(string(matches[1][i+1:]), 10, 64)
-        if err != nil {
-            panic(err)
-        }
-	    stat = float64(minutes + 60 * hours)
-    }else if matches = justMinutesRegex.FindSubmatch(output); len(matches)>0{
-        var err error
-        stat, err = strconv.ParseFloat(string(matches[1]), 64)
-        if err != nil {
-            panic(err)
-        }
-    }
+	var hourStat float64
+	if len(matches) > 0 {
+		i := bytes.IndexByte(matches[1], byte(':'))
+		hours, err := strconv.ParseInt(string(matches[1][:i]), 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		minutes, err := strconv.ParseInt(string(matches[1][i+1:]), 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		hourStat = float64(hours) + float64(minutes)/60
+	} else if matches = justMinutesRegex.FindSubmatch(output); len(matches) > 0 {
+		var err error
+		minutes, err := strconv.ParseFloat(string(matches[1]), 64)
+		if err != nil {
+			panic(err)
+		}
+		hourStat = float64(minutes) / 60
+	}
 
-	err = stathat.PostEZValue("london uptime", "freek@kalteronline.org", stat)
+	var hostname string
+	hostname, err = os.Hostname()
+	if err != nil {
+		hostname = ""
+	}
+	fmt.Println(hourStat, hostname)
+	err = stathat.PostEZValue("uptime@"+hostname, "freek@kalteronline.org", hourStat)
 	if err != nil {
 		panic(err)
 	}
 
-    // wait for a maximum of 20 seconds for request to complete
+	// wait for a maximum of 20 seconds for request to complete
 	stathat.WaitUntilFinished(20 * time.Second)
 }
