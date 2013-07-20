@@ -10,6 +10,7 @@ else
     # from the commandline to in that case the location of this script itself will
     # be used as the working directory.
     DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+    cd $DIR
 fi
 
 ln -f .zshrc ~/.zshrc
@@ -28,6 +29,9 @@ recurseDir(){
         if [ -d $i ]
         then
             recurseDir "$1/$i" "$2/$i"
+            # recurseDir will change the current working dir, so switch back
+            # to the working dir for this loop
+            cd $1
         else
             ln -sf "$1/$i" "$2/$i"
         fi
