@@ -4,3 +4,4 @@ if [ -S /home/fkalter/vlc.sock ]; then
 elif [ "$(pidof parole)" ]; then
     parole --play
 fi
+echo "play/pause" | nc localhost 6007
