@@ -11,5 +11,5 @@ my $lines = read_file( "/home/fkalter/log.txt", array_ref => 1, chomp => 1 )
   or croak "Could not open vlc-log for reading: $!";
 
 my $file = "$dir$lines->[ scalar @$lines -1 ]";
-system("trash-put $file");
+system("trash-put \"$file\"");
 system("~/scripts/vlc-random");
