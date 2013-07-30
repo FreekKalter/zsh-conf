@@ -9,6 +9,7 @@ cd ~/go/src
 if [ $(( `date +%-d` % 5 )) -eq 0 ]; then
     hg sync
     ./all.bash
+    goxc -t
 else
     echo "Building go not needed today, `date +%-d`"
 fi
