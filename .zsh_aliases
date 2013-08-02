@@ -49,6 +49,7 @@ alias xx='exit'
 alias s='sudo'
 alias 'ps?'='ps ax | grep -v grep | grep "$@" -i --color=auto'
 function fname() { find . -iname "*$@*" }
+function tree() { ls -R | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/' }
 
 # global aliases
 alias -g L="| less"

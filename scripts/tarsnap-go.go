@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/stathat/go"
 	"log"
 	"os"
 	"os/exec"
@@ -14,6 +13,8 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/stathat/go"
 )
 
 type Config struct {
@@ -91,7 +92,7 @@ func ParseCommandLine() {
 }
 
 func CallTarsnap() error {
-    fmt.Println(filename)
+	fmt.Println(filename)
 	// build argruments to exec.command
 	arguments := append([]string{"-f" + filename}, os.Args[1:]...)
 	cmd := exec.Command("tarsnap", arguments...)
@@ -99,18 +100,17 @@ func CallTarsnap() error {
 
 	// combine stderr and stdout in one buffer
 	var b bytes.Buffer
-	cmd.Stdout = &b
-	cmd.Stderr = &b
+	cmd.Stdout, cmd.Stderr = &b, &b
 
 	if err := cmd.Start(); err != nil {
 		log.Fatal(err)
 	}
 	cmd.Start()
-	// save process
+	// save process pid
 	process = cmd.Process
 
 	archiveExistsRegex := regexp.MustCompile("^tarsnap: An archive already exists with the name .*")
-    var output []byte
+	var output []byte
 	if err := cmd.Wait(); err != nil {
 		output = b.Bytes()
 		if archiveExistsRegex.Match(output) {
@@ -127,7 +127,7 @@ func CallTarsnap() error {
 }
 
 func parseStats(tarsnapOutput []byte) {
-    fmt.Println("tarsnapOutput:", string(tarsnapOutput))
+	fmt.Println("tarsnapOutput:", string(tarsnapOutput))
 	// get last line of output ( these are the stats )
 	index := bytes.Index(tarsnapOutput, []byte("This archive"))
 
