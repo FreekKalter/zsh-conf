@@ -6,7 +6,7 @@ alias awk='gawk --re-interval'
 # git shortcuts
 alias gs='git status'
 alias gd='git diff'
-alias gam='git commit -am' 
+alias gam='git commit -am'
 alias glog='git --no-pager log --decorate --graph --oneline -10'
 
 OS=`uname -s`
@@ -17,7 +17,8 @@ elif [ $OS = "Linux" ]; then
 fi
 
 # vim shortcuts
-function v () { 
+function v () 
+{
     if [[ $# -gt 0 ]]; then
         $vimCmd --remote-silent $@
     else
@@ -25,7 +26,8 @@ function v () {
     fi
 }
 ## Start vim with session file, standard Session.vim if none specified.
-function vs () { 
+function vs () 
+{
     if [[ $# -gt 0 ]]; then
         $vimCmd -S $@
     else
@@ -34,7 +36,7 @@ function vs () {
 }
 
 # fasd
-alias vv="fasd -f -e \"$vimCmd --remote-silent\"" 
+alias vv="fasd -f -e \"$vimCmd --remote-silent\""
 
 # coloring
 alias grep='grep --color=auto'
@@ -53,6 +55,7 @@ function tree() { ls -R | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -
 
 # global aliases
 alias -g L="| less"
+alias -g EL=" 2>&1 | less"
 alias -g sus="echo '~/scripts/suspend'"
 alias -g gr="| grep"
 
