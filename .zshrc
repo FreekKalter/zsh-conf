@@ -2,7 +2,7 @@
 HISTFILE=~/.histfile
 HISTSIZE=100000000
 SAVEHIST=100000000
-setopt incappendhistory 
+setopt incappendhistory
 setopt sharehistory
 setopt extendedhistory
 
@@ -67,7 +67,9 @@ fi
 export PATH=$PATH:~/scripts
 export PATH=$PATH:/usr/local/sbin
 
-source ~/perl5/perlbrew/etc/bashrc
+if [ -e ~/perl5/perlbrew/etc/bashrc ]; then
+    source ~/perl5/perlbrew/etc/bashrc
+fi
 
 eval "$(fasd --init auto)"
 
@@ -80,7 +82,7 @@ if [ -z "$SSH_CONNECTION" ]; then
         # if no session is started, start a new session
         test -z ${TMUX} && tmux
     fi
-else 
+else
     TERM="linux"
 fi
 
