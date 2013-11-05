@@ -2,6 +2,11 @@
 alias rms='find . -name ".*.sw[a-z]" -print -delete'
 alias unrarall='find . -name "*.rar" -exec unrar e -ad {} \;'
 alias awk='gawk --re-interval'
+alias tl='tarsnap --list-archives'
+alias gdb='gdb -q'
+alias ssh='ssh-add -l || ssh-add && ssh'
+alias ag='sudo apt-get'
+alias stow='stow --no-folding'
 
 # git shortcuts
 alias gs='git status'
@@ -17,7 +22,7 @@ elif [ $OS = "Linux" ]; then
 fi
 
 # vim shortcuts
-function v () 
+function v ()
 {
     if [[ $# -gt 0 ]]; then
         $vimCmd --remote-silent $@
@@ -26,7 +31,7 @@ function v ()
     fi
 }
 ## Start vim with session file, standard Session.vim if none specified.
-function vs () 
+function vs ()
 {
     if [[ $# -gt 0 ]]; then
         $vimCmd -S $@
