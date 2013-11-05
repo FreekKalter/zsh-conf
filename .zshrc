@@ -2,7 +2,7 @@
 HISTFILE=~/.histfile
 HISTSIZE=100000000
 SAVEHIST=100000000
-setopt incappendhistory 
+setopt incappendhistory
 setopt sharehistory
 setopt extendedhistory
 
@@ -34,6 +34,7 @@ bindkey -M viins 'jk' vi-cmd-mode
 # ZSH_THEME="fishy"
 ZSH_THEME="freek"
 
+export TERM=xterm-256color
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
@@ -65,7 +66,7 @@ if [ -d $GO_ROOT ] && [ -d $GOPATH ]; then
 fi
 
 export PATH=$PATH:~/scripts
-export PATH=$PATH:/usr/local/sbin
+export PATH=$PATH:~/scripts/links
 
 source ~/perl5/perlbrew/etc/bashrc
 
@@ -80,7 +81,7 @@ if [ -z "$SSH_CONNECTION" ]; then
         # if no session is started, start a new session
         test -z ${TMUX} && tmux
     fi
-else 
-    TERM="linux"
+else
+    TERM="xterm-256color"
 fi
 
