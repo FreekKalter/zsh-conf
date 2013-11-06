@@ -13,20 +13,24 @@ OS=`uname -s`
 if [ $OS = "Darwin" ]; then
     vimCmd="mvim"
 elif [ $OS = "Linux" ]; then
-    vimCmd="gvim"
+    if command -v gvim >/dev/null 2>&1; then
+        vimCmd="gvim"
+    else
+        vimCmd="vim"
+    fi
 fi
 
 # vim shortcuts
-function v () 
+function v ()
 {
-    if [[ $# -gt 0 ]]; then
+    if [[ $# -gt 0 && $vimCmd != "vim" ]]; then
         $vimCmd --remote-silent $@
     else
         $vimCmd
     fi
 }
 ## Start vim with session file, standard Session.vim if none specified.
-function vs () 
+function vs ()
 {
     if [[ $# -gt 0 ]]; then
         $vimCmd -S $@
