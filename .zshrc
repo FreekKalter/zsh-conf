@@ -68,7 +68,9 @@ fi
 export PATH=$PATH:~/scripts
 export PATH=$PATH:~/scripts/links
 
-source ~/perl5/perlbrew/etc/bashrc
+if [ -e ~/perl5/perlbrew/etc/bashrc ]; then
+    source ~/perl5/perlbrew/etc/bashrc
+fi
 
 eval "$(fasd --init auto)"
 
