@@ -31,7 +31,7 @@ function v ()
     if [[ $# -gt 0 && $vimCmd != "vim" ]]; then
         $vimCmd --remote-silent $@
     else
-        $vimCmd
+        $vimCmd $@
     fi
 }
 ## Start vim with session file, standard Session.vim if none specified.
