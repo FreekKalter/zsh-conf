@@ -62,7 +62,7 @@ function tree() { ls -R | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -
 alias -g L="| less"
 alias -g EL=" 2>&1 | less"
 alias -g sus="echo '~/scripts/suspend'"
-alias -g gr="| grep"
+alias -g gr="| grep --ignore-case"
 
 # Add an "alert" alias for long running commands.  Use like so:
 # sleep 10; alert
