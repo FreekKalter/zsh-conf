@@ -7,7 +7,13 @@ alias gdb='gdb -q'
 alias ssh='ssh-add -l || ssh-add && ssh'
 alias ag='sudo apt-get'
 alias stow='stow --no-folding'
+
+# docker
 alias dock='sudo docker'
+function docker-clean(){
+    sudo docker rmi $(sudo docker images | awk '$1 == "<none>" {print $3}') &&\
+    sudo docker rm $(sudo docker ps -a -q)
+}
 
 # git shortcuts
 alias gs='git status'
