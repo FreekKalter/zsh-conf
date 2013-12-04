@@ -9,7 +9,8 @@ alias ag='sudo apt-get'
 alias stow='stow --no-folding'
 
 # docker
-alias dock='docker'
+DOCKER=$(command -v docker)
+alias dock='$DOCKER'
 function docker-clean(){
      # remove images with no name and all non-running containers
     docker rmi $(docker images | awk '$1 == "<none>" {print $3}') &&\
@@ -65,7 +66,7 @@ alias ll='ls -ahlF'
 alias la='ls -A'
 alias l='ls -CF'
 alias xx='exit'
-alias s='sudo'
+alias s='sudo env PATH=$PATH' # keep path of user calling sudo
 alias 'ps?'='ps ax | grep -v grep | grep "$@" -i --color=auto'
 function fname() { find . -iname "*$@*" }
 function tree() { ls -R | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/' }
