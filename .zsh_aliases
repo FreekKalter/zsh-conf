@@ -9,10 +9,11 @@ alias ag='sudo apt-get'
 alias stow='stow --no-folding'
 
 # docker
-alias dock='sudo docker'
+alias dock='docker'
 function docker-clean(){
-    sudo docker rmi $(sudo docker images | awk '$1 == "<none>" {print $3}') &&\
-    sudo docker rm $(sudo docker ps -a -q)
+     # remove images with no name and all non-running containers
+    docker rmi $(docker images | awk '$1 == "<none>" {print $3}') &&\
+    docker rm $(docker ps -a -q)
 }
 
 # git shortcuts
