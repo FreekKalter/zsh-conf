@@ -13,8 +13,8 @@ DOCKER=$(command -v docker)
 alias dock='$DOCKER'
 function docker-clean(){
      # remove images with no name and all non-running containers
-    docker rmi $(docker images | awk '$1 == "<none>" {print $3}') &&\
-    docker rm $(docker ps -a -q)
+    docker rm $(docker ps -a -q) ;\
+    docker rmi $(docker images | awk '$1 == "<none>" {print $3}')
 }
 
 # git shortcuts
@@ -60,6 +60,10 @@ alias vv="fasd -f -e \"$vimCmd --remote-silent\""
 alias grep='grep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
+alias -g red-grep="GREP_COLOR='1;31' grep --color=always"
+alias -g green-grep="GREP_COLOR='1;32' grep --color=always"
+# alias -g hfp="GREP_COLOR='1;31' grep -E --color=always --line-buffered | GREP_COLOR='1;32' grep -E --color=always"
+alias -g hfp="red-grep -E --line-buffered 'FAIL|$' | green-grep -E 'PASS|$'"
 
 # commands i use alot
 alias ll='ls -ahlF'
@@ -68,6 +72,7 @@ alias l='ls -CF'
 alias xx='exit'
 alias s='sudo env PATH=$PATH' # keep path of user calling sudo
 alias 'ps?'='ps ax | grep -v grep | grep "$@" -i --color=auto'
+alias o='xdg-open'
 function fname() { find . -iname "*$@*" }
 function tree() { ls -R | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/' }
 
