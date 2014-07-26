@@ -1,5 +1,22 @@
 #!/bin/sh
 
+# Install necessary programs
+NEEDED_PROGS=( git tmux zsh )
+TO_INSTALL=""
+
+# [@] will get all elements, crazy bash
+for prog in "${NEEDED_PROGS[@]}"; do
+    if [[ -z $(command -v $prog) ]]; then
+        TO_INSTALL="$TO_INSTALL $prog"
+    fi
+done
+
+if [[ -n $TO_INSTALL ]]; then
+    echo "[-] going to install $TO_INSTALL"
+    sudo apt-get install -y $TO_INSTALL
+    echo "[+] installed necessary programs"
+fi
+
 git clone https://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
 
 ln -fs `pwd`/.zshrc ~/.zshrc
