@@ -52,6 +52,8 @@ export VISUAL='gvim -f'
 export EDITOR='vim'
 export COLUMNS=${COLUMNS}
 
+export VAGRANT_HOME='/media/truecrypt3/.vagrant.d'
+
 # Customize to your needs...
 # export PATH=/home/fkalter/perl5/perlbrew/bin:/home/fkalter/perl5/perlbrew/perls/perl-5.16.0/bin:/usr/lib/lightdm/lightdm:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games
 
