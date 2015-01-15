@@ -67,6 +67,7 @@ fi
 
 export PATH=$PATH:~/scripts
 export PATH=$PATH:~/scripts/links
+export PATH=$PATH:/usr/local/share/python
 
 if [ -e ~/perl5/perlbrew/etc/bashrc ]; then
     source ~/perl5/perlbrew/etc/bashrc
