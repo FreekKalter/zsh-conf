@@ -71,6 +71,7 @@ alias la='ls -A'
 alias l='ls -CF'
 alias xx='exit'
 alias s='sudo'
+alias fucking='sudo'
 alias 'ps?'='ps ax | grep -v grep | grep "$@" -i --color=auto'
 alias o='xdg-open'
 function fname() { find . -iname "*$@*" }
