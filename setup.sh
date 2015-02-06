@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Install necessary programs
 NEEDED_PROGS=( git tmux zsh )
