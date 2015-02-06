@@ -25,8 +25,6 @@ ln -fs `pwd`/.zshrc ~/.zshrc
 ln -fs `pwd`/.zsh_aliases ~/.zsh_aliases
 ln -fs `pwd`/.tmux.conf ~/.tmux.conf
 ln -fs `pwd`/freek.zsh-theme ~/.oh-my-zsh/themes/freek.zsh-theme
-mkdir -p ~/.config
-ln -fs ` pwd`/flake8 ~/.config/flake8
 
 if [ ! -d ~/fasd ]; then
     git clone https://github.com/clvv/fasd.git ~/fasd
