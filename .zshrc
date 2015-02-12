@@ -43,6 +43,7 @@ source $ZSH/oh-my-zsh.sh
 
 fpath=(~/.zsh/completion $fpath)
 
+# completion system
 autoload -Uz compinit
 compinit
 
@@ -59,6 +60,7 @@ export VAGRANT_HOME='/media/truecrypt3/.vagrant.d'
 
 export GO_ROOT=~/go # not GOROOT cause go will set that itself
 export GOPATH=~/gopath
+export GOROOT_BOOTSTRAP=$GO_ROOT #
 
 if [ -d $GO_ROOT ] && [ -d $GOPATH ]; then
     export PATH=$PATH:$GO_ROOT/bin:$GOPATH/bin
