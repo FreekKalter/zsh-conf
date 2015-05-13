@@ -58,9 +58,8 @@ export VAGRANT_HOME='/media/truecrypt3/.vagrant.d'
 # Customize to your needs...
 # export PATH=/home/fkalter/perl5/perlbrew/bin:/home/fkalter/perl5/perlbrew/perls/perl-5.16.0/bin:/usr/lib/lightdm/lightdm:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games
 
-export GO_ROOT=~/go # not GOROOT cause go will set that itself
 export GOPATH=~/gopath
-export GOROOT_BOOTSTRAP=$GO_ROOT #
+export PATH=$PATH:/usr/local/go/bin
 
 if [ -d $GO_ROOT ] && [ -d $GOPATH ]; then
     export PATH=$PATH:$GO_ROOT/bin:$GOPATH/bin
