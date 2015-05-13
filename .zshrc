@@ -89,3 +89,5 @@ else
     TERM="xterm-256color"
 fi
 
+# don't hang ctrl-s when in terminal vim
+stty -ixon
