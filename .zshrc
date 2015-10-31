@@ -73,6 +73,8 @@ if [ -e ~/perl5/perlbrew/etc/bashrc ]; then
     source ~/perl5/perlbrew/etc/bashrc
 fi
 
+export PYTHONIOENCODING=utf_8
+
 eval "$(fasd --init auto)"
 
 # load aliases file
