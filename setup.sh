@@ -1,13 +1,16 @@
 #!/bin/bash
 
 # Install necessary programs
-NEEDED_PROGS=( git tmux zsh )
+declare -A NEEDED_PROGS=( ["git"]="git"
+			  ["tmux"]="tmux"
+			  ["zsh"]="zsh"
+		          ["make"]="build-essential" )
 TO_INSTALL=""
 
 # [@] will get all elements, crazy bash
-for prog in "${NEEDED_PROGS[@]}"; do
+for prog in "${!NEEDED_PROGS[@]}"; do
     if [[ -z $(command -v $prog) ]]; then
-        TO_INSTALL="$TO_INSTALL $prog"
+        TO_INSTALL="$TO_INSTALL ${NEEDED_PROGS["$prog"]}"
     fi
 done
 
