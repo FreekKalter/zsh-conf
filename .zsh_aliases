@@ -12,8 +12,9 @@ alias stow='stow --no-folding'
 DOCKER=$(command -v docker)
 alias dock='$DOCKER'
 function docker-clean(){
-     # remove images with no name and all non-running containers
-    docker rm $(docker ps -a -q) ;\
+    # remove containers with generated names (ie; with a _ in the name)
+    docker rm $(docker ps -a | tail -n +2 | awk 'BEGIN{FS=" {2,}"}; {if (NF == 7){print $7}else{print $6}}' | grep  _);\
+    # remove images without name
     docker rmi $(docker images | awk '$1 == "<none>" {print $3}')
 }
 
