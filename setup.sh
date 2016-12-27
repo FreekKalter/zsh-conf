@@ -24,6 +24,10 @@ if [ ! -d ~/.oh-my-zsh ]; then
     git clone https://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
 fi
 
+if [ ! -d ~/scripts ]; then
+    git clone https://github.com/FreekKalter/linux-scripts ~/scripts
+fi
+
 ln -fs `pwd`/.zshrc ~/.zshrc
 ln -fs `pwd`/.zsh_aliases ~/.zsh_aliases
 ln -fs `pwd`/.tmux.conf ~/.tmux.conf
