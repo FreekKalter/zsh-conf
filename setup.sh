@@ -40,3 +40,4 @@ if [ ! -d ~/fasd ]; then
     cd ~/fasd
     sudo make install
 fi
+chsh -s /usr/bin/zsh
