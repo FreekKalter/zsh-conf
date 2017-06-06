@@ -73,7 +73,7 @@ export PATH=$PATH:/usr/local/share/python
 # linux
 if [[ `uname` == 'Linux' ]]; then
     export PATH=/home/fkalter/anaconda3/bin:$PATH
-    export PATH=/home/fkalter/anaconda/bin:$PATH
+    export PATH=$PATH:/home/fkalter/anaconda2/bin
 fi
 if [[ `uname` == 'Darwin' ]]; then
     export PATH=$PATH:/opt/local/bin

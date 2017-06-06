@@ -2,5 +2,5 @@
 # Ignore "list comprehension redefines name from line N"
 # Pyflakes doesn't variable handle scope very well, so this gives more
 # false positives than useful ones.
-ignore = F812
+ignore = F812, E221, E402
 max-line-length = 120
